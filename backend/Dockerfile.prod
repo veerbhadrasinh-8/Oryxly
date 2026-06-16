@@ -1,0 +1,45 @@
+# Production-only image — no bind mounts, no --reload, no dev deps.
+#
+# Used by Railway / any container host. The same image runs both the API
+# (default CMD) and the worker (override CMD to celery).
+
+FROM python:3.12-slim AS base
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_NO_DEV=1
+
+WORKDIR /app
+
+# System deps. libpq for psycopg, build-essential to compile wheels that
+# don't ship binaries for arm64 slim. curl is only needed at install time.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential libpq-dev curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/* && \
+    curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv /root/.local/bin/uv /usr/local/bin/uv
+
+# Dependency layer — cached as long as pyproject + lock are stable.
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-install-project --no-dev
+
+# Project code last so a code change doesn't bust the deps cache.
+COPY . .
+RUN uv sync --frozen --no-dev && \
+    mkdir -p /app/storage/attachments && \
+    chown -R 1000:1000 /app/storage
+
+# Non-root runtime user. Railway, Fly, Render all run as root by default
+# but we drop privileges anyway — defence in depth.
+RUN useradd -u 1000 -m mailflow
+USER mailflow
+
+EXPOSE 8000
+
+# Default to the API. Worker dyno overrides this with:
+#   uv run celery -A app.workers.celery_app:celery_app worker --loglevel=info --concurrency=2
+CMD ["uv", "run", "uvicorn", "app.main:app", \
+     "--host", "0.0.0.0", "--port", "8000", \
+     "--workers", "2", "--access-log", "--no-use-colors"]
