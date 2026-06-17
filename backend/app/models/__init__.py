@@ -1,4 +1,5 @@
 from app.models.attachment import Attachment
+from app.models.invitation import Invitation
 from app.models.audit_log import AuditLog
 from app.models.campaign import (
     Campaign,
@@ -25,4 +26,5 @@ __all__ = [
     "RecipientStatus",
     "Attachment",
     "AuditLog",
+    "Invitation",
 ]

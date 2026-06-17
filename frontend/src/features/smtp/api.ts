@@ -22,3 +22,8 @@ export async function testSmtp(smtpId: string, to_email?: string) {
 export async function deleteSmtp(smtpId: string) {
   await api.delete(`/smtp/${smtpId}`);
 }
+
+export async function lockSmtp(smtpId: string) {
+  const { data } = await api.post<{ success: true; message: string }>(`/smtp/${smtpId}/lock`);
+  return data;
+}

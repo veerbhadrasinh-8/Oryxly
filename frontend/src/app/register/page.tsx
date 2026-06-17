@@ -20,8 +20,19 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    // Step 1: create the account. A failure here is a real registration error.
     try {
       await registerRequest(fullName, email, password);
+    } catch (err) {
+      const detail = isAxiosError(err) ? err.response?.data?.detail : null;
+      setError(detail ?? "Registration failed");
+      setLoading(false);
+      return;
+    }
+
+    // Step 2: account exists now. Auto-login as a convenience — if it hiccups,
+    // don't claim registration failed; send them to the login page instead.
+    try {
       const data = await loginRequest(email, password);
       setSession({
         accessToken: data.access_token,
@@ -29,9 +40,8 @@ export default function RegisterPage() {
         user: data.user,
       });
       router.replace("/dashboard");
-    } catch (err) {
-      const detail = isAxiosError(err) ? err.response?.data?.detail : null;
-      setError(detail ?? "Registration failed");
+    } catch {
+      router.replace("/login?registered=1");
     } finally {
       setLoading(false);
     }

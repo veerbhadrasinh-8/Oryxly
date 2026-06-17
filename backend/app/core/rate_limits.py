@@ -1,34 +1,52 @@
-"""Per-user-per-day send counters in Redis."""
+"""Per-user monthly send counters in Redis.
+
+The counter reflects **successful** sends in the current calendar month
+(UTC). To avoid a check-then-increment race across concurrent workers, a
+slot is *reserved* atomically before the SMTP send; the reservation is kept
+on success and released on failure/retry. This makes the cap exact even
+under worker concurrency > 1.
+"""
 
 from datetime import datetime, timezone
 
 from app.core.redis_client import redis_client
-from app.core.plans import DAILY_EMAIL_LIMIT
-from app.models.user import UserPlan
+
+# Keep the key well past a month boundary so a slow month-end send still
+# counts against the right bucket; the month is encoded in the key itself.
+_KEY_TTL_SECONDS = 40 * 24 * 60 * 60
 
 
-def _today_key(user_id: str) -> str:
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    return f"mailflow:dailysend:{user_id}:{today}"
+def _month_key(user_id: str) -> str:
+    month = datetime.now(timezone.utc).strftime("%Y-%m")
+    return f"mailflow:monthsend:{user_id}:{month}"
 
 
-def get_sent_today(user_id: str) -> int:
-    """Return how many sends the user has already used today."""
-    raw = redis_client.get(_today_key(user_id))
+def get_sent_this_month(user_id: str) -> int:
+    """Return how many sends the user has used in the current month."""
+    raw = redis_client.get(_month_key(user_id))
     return int(raw) if raw else 0
 
 
-def can_send_more(user_id: str, plan: UserPlan, *, want: int = 1) -> bool:
-    used = get_sent_today(user_id)
-    limit = DAILY_EMAIL_LIMIT[plan]
-    return used + want <= limit
+def reserve_send_slot(user_id: str, limit: int, *, want: int = 1) -> bool:
+    """Atomically reserve `want` send slots if within `limit`.
+
+    Increments the counter first (atomic), then rolls back if the new total
+    would exceed the limit. Returns True if the reservation succeeded.
+    """
+    key = _month_key(user_id)
+    new_total = redis_client.incrby(key, want)
+    if new_total == want:
+        # First write this month — set expiry.
+        redis_client.expire(key, _KEY_TTL_SECONDS)
+    if new_total > limit:
+        redis_client.decrby(key, want)
+        return False
+    return True
 
 
-def increment_sent(user_id: str) -> int:
-    """Increment the counter and return the new total. The key expires
-    36 h after first use, which is comfortably past any UTC day rollover."""
-    key = _today_key(user_id)
-    new_val = redis_client.incr(key)
-    if new_val == 1:
-        redis_client.expire(key, 36 * 60 * 60)
-    return int(new_val)
+def release_send_slot(user_id: str, *, want: int = 1) -> None:
+    """Release a previously reserved slot (on send failure or retry)."""
+    key = _month_key(user_id)
+    current = redis_client.get(key)
+    if current and int(current) >= want:
+        redis_client.decrby(key, want)

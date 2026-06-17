@@ -19,6 +19,7 @@ class SmtpRead(BaseModel):
     smtp_port: int
     smtp_username: str
     status: str
+    is_locked: bool = False
     last_verified_at: datetime | None
     created_at: datetime
 
@@ -35,6 +36,11 @@ class SmtpTestResponse(BaseModel):
 
 class SmtpDeleteResponse(BaseModel):
     success: bool = True
+
+
+class SmtpLockResponse(BaseModel):
+    success: bool = True
+    message: str = "SMTP account locked permanently"
 
 
 class SmtpSendTestRequest(BaseModel):

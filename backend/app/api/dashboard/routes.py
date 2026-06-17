@@ -5,8 +5,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
-from app.core.plans import DAILY_EMAIL_LIMIT
-from app.core.rate_limits import get_sent_today
+from app.core.plans import effective_monthly_email_limit
+from app.core.rate_limits import get_sent_this_month
 from app.database.session import get_db
 from app.models.campaign import (
     Campaign,
@@ -22,9 +22,9 @@ from app.repositories import campaigns as campaigns_repo
 from app.schemas.campaigns import CampaignSummary
 from app.schemas.dashboard import (
     CampaignCounts,
-    DailyUsage,
     DashboardSummary,
     EmailCounts,
+    MonthlyUsage,
     RecentCampaignsResponse,
     SmtpCounts,
 )
@@ -105,9 +105,9 @@ def summary(
         smtp=SmtpCounts(total=smtp_total, active=smtp_active),
         contact_lists=list_count,
         templates=tpl_count,
-        daily=DailyUsage(
-            sent_today=get_sent_today(str(user.id)),
-            daily_cap=DAILY_EMAIL_LIMIT[user.plan],
+        monthly=MonthlyUsage(
+            sent_this_month=get_sent_this_month(str(user.id)),
+            monthly_cap=effective_monthly_email_limit(user),
         ),
     )
 

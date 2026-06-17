@@ -39,9 +39,30 @@ def user_credentials() -> dict:
     }
 
 
+def _seed_invitation(email: str) -> None:
+    """Registration is invitation-only; seed an invitation so the test user
+    can register. Idempotent — ignores an already-existing invitation."""
+    from app.database.session import SessionLocal
+    from app.repositories import invitations as inv_repo
+
+    db = SessionLocal()
+    try:
+        if inv_repo.get_by_email(db, email.lower()) is None:
+            inv_repo.create(db, email=email.lower(), invited_by=None)
+    finally:
+        db.close()
+
+
+@pytest.fixture
+def seed_invitation():
+    """Callable that seeds an invitation for a given email (invite-only flow)."""
+    return _seed_invitation
+
+
 @pytest.fixture
 def registered_user(client: TestClient, user_credentials: dict) -> dict:
     """A registered + logged-in user. Returns the credentials + access token."""
+    _seed_invitation(user_credentials["email"])
     r = client.post("/auth/register", json=user_credentials)
     assert r.status_code in (201, 409), r.text  # 409 acceptable if rerun
     r = client.post(

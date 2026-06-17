@@ -24,9 +24,9 @@ class SmtpCounts(BaseModel):
     active: int
 
 
-class DailyUsage(BaseModel):
-    sent_today: int
-    daily_cap: int
+class MonthlyUsage(BaseModel):
+    sent_this_month: int
+    monthly_cap: int
 
 
 class DashboardSummary(BaseModel):
@@ -35,7 +35,7 @@ class DashboardSummary(BaseModel):
     smtp: SmtpCounts
     contact_lists: int
     templates: int
-    daily: DailyUsage
+    monthly: MonthlyUsage
 
 
 class RecentCampaignsResponse(BaseModel):

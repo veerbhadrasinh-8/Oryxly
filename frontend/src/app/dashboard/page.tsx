@@ -21,9 +21,10 @@ function DashboardInner() {
   });
 
   const s = summaryQ.data;
-  const dailyPct = s
-    ? Math.min(100, Math.round((s.daily.sent_today / s.daily.daily_cap) * 100))
-    : 0;
+  const monthlyPct =
+    s && s.monthly.monthly_cap > 0
+      ? Math.min(100, Math.round((s.monthly.sent_this_month / s.monthly.monthly_cap) * 100))
+      : 0;
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12 font-sans space-y-8">
@@ -69,10 +70,10 @@ function DashboardInner() {
           href="/smtp"
         />
         <KpiCard
-          label="Today's quota"
-          value={s ? `${s.daily.sent_today}/${s.daily.daily_cap}` : "—"}
-          sub={s ? `${dailyPct}% of daily cap` : ""}
-          accent={dailyPct >= 90 ? "red" : dailyPct >= 60 ? "amber" : undefined}
+          label="Monthly quota"
+          value={s ? `${s.monthly.sent_this_month}/${s.monthly.monthly_cap}` : "—"}
+          sub={s ? `${monthlyPct}% of monthly cap` : ""}
+          accent={monthlyPct >= 90 ? "red" : monthlyPct >= 60 ? "amber" : undefined}
         />
       </section>
 

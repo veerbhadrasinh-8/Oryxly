@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.user import User
+from app.models.user import User, UserPlan
 
 
 def get_by_email(db: Session, email: str) -> User | None:
@@ -20,3 +20,29 @@ def create(db: Session, *, full_name: str, email: str, password_hash: str) -> Us
     db.commit()
     db.refresh(user)
     return user
+
+
+def list_all(db: Session) -> list[User]:
+    return list(db.execute(select(User).order_by(User.created_at.desc())).scalars().all())
+
+
+def set_admin(db: Session, user: User, *, is_admin: bool) -> None:
+    user.is_admin = is_admin
+    db.commit()
+
+
+def set_active(db: Session, user: User, *, is_active: bool) -> None:
+    user.is_active = is_active
+    db.commit()
+
+
+def set_plan(db: Session, user: User, *, plan: UserPlan) -> None:
+    user.plan = plan
+    db.commit()
+
+
+def set_monthly_email_limit(db: Session, user: User, *, limit: int | None) -> None:
+    """Set or clear a user's custom monthly email cap. ``None`` reverts the
+    user to their plan's default limit."""
+    user.monthly_email_limit = limit
+    db.commit()

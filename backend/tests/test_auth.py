@@ -5,12 +5,13 @@ import uuid
 from fastapi.testclient import TestClient
 
 
-def test_register_then_login(client: TestClient):
+def test_register_then_login(client: TestClient, seed_invitation):
     creds = {
         "full_name": "Reg User",
         "email": f"reg-{uuid.uuid4().hex[:8]}@mailflow-tests.com",
         "password": "GoodPass123!",
     }
+    seed_invitation(creds["email"])
     r = client.post("/auth/register", json=creds)
     assert r.status_code == 201
     body = r.json()
@@ -21,6 +22,17 @@ def test_register_then_login(client: TestClient):
     data = r.json()["data"]
     assert "access_token" in data and "refresh_token" in data
     assert data["user"]["email"] == creds["email"]
+
+
+def test_register_without_invitation_rejected(client: TestClient):
+    creds = {
+        "full_name": "Uninvited",
+        "email": f"uninvited-{uuid.uuid4().hex[:8]}@mailflow-tests.com",
+        "password": "GoodPass123!",
+    }
+    r = client.post("/auth/register", json=creds)
+    assert r.status_code == 403, r.text
+    assert "invitation" in r.json()["detail"].lower()
 
 
 def test_duplicate_register_rejected(client: TestClient, registered_user):
@@ -70,7 +82,7 @@ def test_me_returns_self(client: TestClient, registered_user, auth_headers):
     assert r.status_code == 200
     body = r.json()
     assert body["email"] == registered_user["email"]
-    assert body["plan"] in {"starter", "growth", "agency"}
+    assert body["plan"] in {"lite", "starter", "growth", "agency"}
 
 
 def test_refresh_returns_new_access_token(client: TestClient, registered_user):

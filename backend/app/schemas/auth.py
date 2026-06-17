@@ -23,6 +23,7 @@ class UserPublic(BaseModel):
     email: EmailStr
     full_name: str
     plan: str
+    is_admin: bool = False
 
 
 class LoginData(BaseModel):
@@ -54,3 +55,4 @@ class MeResponse(BaseModel):
     name: str
     email: EmailStr
     plan: str
+    is_admin: bool = False

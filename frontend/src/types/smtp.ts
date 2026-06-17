@@ -7,6 +7,7 @@ export type SmtpAccount = {
   smtp_port: number;
   smtp_username: string;
   status: SmtpStatus;
+  is_locked: boolean;
   last_verified_at: string | null;
   created_at: string;
 };

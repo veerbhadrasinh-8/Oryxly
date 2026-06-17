@@ -15,6 +15,7 @@ from app.schemas.smtp import (
     SmtpCreate,
     SmtpCreateResponse,
     SmtpDeleteResponse,
+    SmtpLockResponse,
     SmtpRead,
     SmtpSendTestRequest,
     SmtpTestResponse,
@@ -38,6 +39,7 @@ def _to_read(account: SmtpAccount) -> SmtpRead:
         smtp_port=account.smtp_port,
         smtp_username=account.smtp_username,
         status=account.status.value,
+        is_locked=account.is_locked,
         last_verified_at=account.last_verified_at,
         created_at=account.created_at,
     )
@@ -131,6 +133,29 @@ def test_smtp(
     return SmtpTestResponse(success=True, message="SMTP verified")
 
 
+@router.post("/{smtp_id}/lock", response_model=SmtpLockResponse)
+def lock_smtp(
+    smtp_id: UUID,
+    request: Request,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> SmtpLockResponse:
+    account = smtp_repo.get_owned(db, user_id=user.id, smtp_id=smtp_id)
+    if account is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="smtp account not found")
+    if account.is_locked:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="smtp account already locked")
+    if account.status.value != "active":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="can only lock a verified (active) smtp account",
+        )
+    smtp_repo.lock(db, account)
+    audit(db, action="smtp.lock", user_id=user.id, request=request,
+          target_type="smtp", target_id=smtp_id)
+    return SmtpLockResponse()
+
+
 @router.delete("/{smtp_id}", response_model=SmtpDeleteResponse)
 def delete_smtp(
     smtp_id: UUID,
@@ -141,6 +166,11 @@ def delete_smtp(
     account = smtp_repo.get_owned(db, user_id=user.id, smtp_id=smtp_id)
     if account is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="smtp account not found")
+    if account.is_locked:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="smtp account is locked and cannot be deleted",
+        )
     in_use = usage_repo.campaigns_using_smtp(db, account.id)
     if in_use:
         raise HTTPException(

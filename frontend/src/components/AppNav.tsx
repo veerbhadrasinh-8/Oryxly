@@ -75,6 +75,18 @@ export function AppNav() {
               </Link>
             );
           })}
+          {meQ.data?.is_admin && (
+            <Link
+              href="/admin"
+              className={`rounded-md px-3 py-1.5 text-sm transition whitespace-nowrap ${
+                isActive("/admin")
+                  ? "bg-violet-600 text-white font-medium"
+                  : "text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/30"
+              }`}
+            >
+              Admin
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-3 shrink-0">

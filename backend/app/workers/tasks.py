@@ -30,7 +30,8 @@ from app.workers.celery_app import celery_app  # noqa: F401
 from app.core.crypto import decrypt
 from app.repositories import attachments as att_repo
 from app.services.storage import get_storage
-from app.core.rate_limits import can_send_more, increment_sent
+from app.core.plans import effective_monthly_email_limit
+from app.core.rate_limits import release_send_slot, reserve_send_slot
 from app.database.session import SessionLocal
 from app.models.campaign import (
     Campaign,
@@ -139,15 +140,6 @@ def send_recipient(self, recipient_id: str) -> dict:
             _maybe_finalize(db, c.id)
             return {"ok": False, "reason": "missing config"}
 
-        # Daily-cap check (per-user). If hit, reschedule the recipient an
-        # hour later as a *fresh* task — we don't use self.retry() because
-        # that would consume the SMTP retry budget (max_retries=2). The
-        # daily cap is an environmental wait, not a delivery failure.
-        if not can_send_more(str(user.id), user.plan, want=1):
-            log.info("send_recipient %s: daily cap reached, rescheduling +1h", recipient_id)
-            send_recipient.apply_async(args=[recipient_id], countdown=60 * 60)
-            return {"ok": True, "reason": "rescheduled — daily cap"}
-
         # Render template with per-contact data
         data = {
             "name": contact.name or "",
@@ -189,6 +181,19 @@ def send_recipient(self, recipient_id: str) -> dict:
         except Exception as exc:  # noqa: BLE001 — storage failure shouldn't crash send
             log.warning("send_recipient %s: failed loading attachments: %s", recipient_id, exc)
 
+        # Monthly-cap reservation (per-user). Reserve a slot atomically right
+        # before sending so concurrent workers can't overshoot the cap, and so
+        # no work between here and the send can leak a reserved slot. If the
+        # month is full, reschedule the recipient a day later as a *fresh*
+        # task — we don't use self.retry() because that would consume the SMTP
+        # retry budget (max_retries=2). A full cap is an environmental wait,
+        # not a delivery failure.
+        monthly_limit = effective_monthly_email_limit(user)
+        if not reserve_send_slot(str(user.id), monthly_limit, want=1):
+            log.info("send_recipient %s: monthly cap reached, rescheduling +1d", recipient_id)
+            send_recipient.apply_async(args=[recipient_id], countdown=24 * 60 * 60)
+            return {"ok": True, "reason": "rescheduled — monthly cap"}
+
         try:
             send_message(
                 creds,
@@ -207,6 +212,11 @@ def send_recipient(self, recipient_id: str) -> dict:
             # Explicit retry-budget check — clearer than catching
             # MaxRetriesExceededError and survives any future change
             # to self.retry()'s exception semantics.
+            #
+            # Release the reserved monthly slot: this attempt did not deliver.
+            # On retry the retried task re-reserves; on terminal failure the
+            # slot is freed so a failed send never counts against the cap.
+            release_send_slot(str(user.id))
             if self.request.retries >= self.max_retries:
                 _mark_failed(db, rec, c, str(exc))
                 _maybe_finalize(db, c.id)
@@ -225,7 +235,7 @@ def send_recipient(self, recipient_id: str) -> dict:
             .values(sent_count=Campaign.sent_count + 1)
         )
         db.commit()
-        increment_sent(str(user.id))
+        # Monthly slot already reserved before the send; nothing to increment.
         log.info("send_recipient %s: SENT to %s", recipient_id, contact.email)
 
         _maybe_finalize(db, c.id)

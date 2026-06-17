@@ -2,7 +2,8 @@ export type User = {
   id: string;
   email: string;
   full_name: string;
-  plan: "starter" | "growth" | "agency";
+  plan: "lite" | "starter" | "growth" | "agency";
+  is_admin: boolean;
 };
 
 export type LoginResponse = {

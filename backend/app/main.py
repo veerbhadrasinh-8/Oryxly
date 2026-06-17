@@ -4,6 +4,7 @@ from sqlalchemy import text
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
+from app.api.admin import router as admin_router
 from app.api.attachments import router as attachments_router
 from app.api.auth import router as auth_router
 from app.api.campaigns import router as campaigns_router
@@ -46,6 +47,7 @@ app.add_middleware(
 
 
 app.include_router(auth_router)
+app.include_router(admin_router)
 app.include_router(smtp_router)
 app.include_router(contacts_router)
 app.include_router(templates_router)

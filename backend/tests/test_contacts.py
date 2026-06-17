@@ -68,7 +68,7 @@ def test_list_then_detail(client: TestClient, auth_headers):
     assert detail["contacts"][0]["email"] == "x@y.com"
 
 
-def test_cross_tenant_isolation(client: TestClient, auth_headers, user_credentials):
+def test_cross_tenant_isolation(client: TestClient, auth_headers, user_credentials, seed_invitation):
     # Make a list on user A
     csv = b"email\na@a.com\n"
     upload = client.post(
@@ -86,6 +86,7 @@ def test_cross_tenant_isolation(client: TestClient, auth_headers, user_credentia
         "email": f"other-{_uuid.uuid4().hex[:6]}@mailflow-tests.com",
         "password": "TestPass123!",
     }
+    seed_invitation(b_creds["email"])
     client.post("/auth/register", json=b_creds)
     b_login = client.post(
         "/auth/login",

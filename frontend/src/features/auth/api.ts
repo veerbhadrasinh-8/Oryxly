@@ -19,9 +19,9 @@ export async function logoutRequest() {
   await api.post("/auth/logout");
 }
 
-type MeResponse = { id: string; name: string; email: string; plan: User["plan"] };
+type MeResponse = { id: string; name: string; email: string; plan: User["plan"]; is_admin: boolean };
 
 export async function fetchMe(): Promise<User> {
   const { data } = await api.get<MeResponse>("/auth/me");
-  return { id: data.id, full_name: data.name, email: data.email, plan: data.plan };
+  return { id: data.id, full_name: data.name, email: data.email, plan: data.plan, is_admin: data.is_admin ?? false };
 }

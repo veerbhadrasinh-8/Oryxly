@@ -16,8 +16,67 @@ Living log of what was actually built in each phase. Updated when a phase exits.
 | 10 | Attachments | ✅ Complete | 2026-06-03 |
 | 11 | Security Hardening | ✅ Complete | 2026-06-03 |
 | 12 | Testing & Launch | ✅ Complete | 2026-06-03 |
+| 13 | Invite-only + Admin + Monthly quota | ✅ Complete | 2026-06-17 |
 
-**🚀 All 12 phases complete. MVP shipped.**
+**🚀 All 12 phases complete. MVP shipped.** Post-MVP commercial layer added in Phase 13.
+
+---
+
+## Phase 13 — Invite-only access, Admin panel, Monthly quota + Lite plan ✅
+
+**Completed:** 2026-06-17
+**Spec refs:** Diverges from [01_prd.md](../ai-context/01_prd.md) §12-13 pricing — directed by product owner (Oryxus). Flagged and approved.
+
+### What we built
+
+**SMTP credential locking**
+- `smtp_accounts.is_locked` column. `POST /smtp/{id}/lock` permanently locks a *verified* account.
+- Locked accounts cannot be edited or deleted (`DELETE` returns 403). Frontend shows lock badge + confirm modal, hides destructive actions when locked.
+
+**Invitation-only registration**
+- New `invitations` table `(id, email unique, invited_by FK→users SET NULL, is_used, created_at)`.
+- `POST /auth/register` requires an unused invitation; `oryxusofficial@gmail.com` bypasses and auto-becomes admin (`users.is_admin`).
+- Register order: existing-user (409) → invitation (403) → create.
+
+**Admin panel** (`/admin`, gated by `require_admin` dep + frontend `is_admin` guard)
+- `GET/PATCH /admin/users` — change plan, toggle active, set/clear custom monthly email limit.
+- `GET/POST/DELETE /admin/invitations` — invite by email, list, revoke unused.
+- Nav shows "Admin" link only for admins.
+
+**Monthly email quota (replaced daily)**
+- `app/core/plans.py`: `MONTHLY_EMAIL_LIMIT` + `effective_monthly_email_limit(user)` (per-user override wins over plan default).
+- `users.monthly_email_limit` (nullable; null = plan default) — admin-editable.
+- `rate_limits.py` rewritten: month-keyed Redis counter with **atomic reserve/release** — `reserve_send_slot` increments-then-checks-then-rolls-back, eliminating the prior check-then-increment race (zero overshoot under worker concurrency). Worker reserves immediately before send, releases on retry/terminal failure, keeps on success.
+- Dashboard switched to monthly (`MonthlyUsage`: `sent_this_month` / `monthly_cap`).
+
+**New Lite plan** — `UserPlan.LITE` (enum value added via `ALTER TYPE … ADD VALUE` in `autocommit_block`).
+
+### Pricing (current, monthly)
+| Plan | ₹/mo | Emails/mo | SMTP | Contacts |
+|---|---|---|---|---|
+| Lite | 899 | 900 | 1 | 1,000 |
+| Starter | 1,499 | 5,000 | 1 | 5,000 |
+| Growth | 3,499 | 30,000 | 3 | 25,000 |
+| Agency | 7,999 | 150,000 | 10 | unlimited |
+
+Margin: customers use their own SMTP → email volume cost ≈ ₹0. Only fixed Railway infra (~₹3-4k/mo). Profitable from ~5 Lite users.
+
+### Verified evidence
+- `alembic upgrade head` → `092133ef008c (head)`, two migrations applied clean.
+- Backend imports clean; `pytest -q` → **46 pass** (added `test_rate_limits.py` 4 tests proving no overshoot/leak; added invite-only register test; fixtures seed invitations).
+- `tsc --noEmit` clean.
+
+### Decisions / deviations
+- Pricing/quota model diverges from PRD §12-13 (daily→monthly, Lite tier added, per-user override). Product-owner directed.
+- Logout remains stateless (token valid until exp) — pre-existing MVP tradeoff, unchanged.
+
+### Production deploy reminders (NOT code bugs — must do before launch)
+- Set strong `SECRET_KEY` + fresh `FERNET_KEY` on Railway (defaults in `config.py` are insecure placeholders).
+- `DEBUG=false`, add prod domain to `CORS_ORIGINS`.
+
+### Files added/changed
+- Added: `app/models/invitation.py`, `app/repositories/invitations.py`, `app/api/admin/{__init__,routes}.py`, `app/schemas/admin.py`, `frontend/src/features/admin/{api.ts,UsersTable.tsx,InvitationsPanel.tsx}`, `frontend/src/app/admin/page.tsx`, `tests/test_rate_limits.py`, 2 alembic migrations.
+- Changed: `app/models/{user,smtp_account}.py`, `app/core/{plans,rate_limits}.py`, `app/workers/tasks.py`, `app/api/{auth,smtp,dashboard}/routes.py`, `app/schemas/{auth,smtp,dashboard}.py`, `app/repositories/{users,smtp_accounts}.py`, `app/api/deps.py`, `app/main.py`, frontend types + `SmtpCard.tsx` + `AppNav.tsx` + `dashboard/page.tsx`, test fixtures.
 
 ---
 

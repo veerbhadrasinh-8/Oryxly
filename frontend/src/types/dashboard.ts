@@ -14,7 +14,7 @@ export type DashboardSummary = {
   smtp: { total: number; active: number };
   contact_lists: number;
   templates: number;
-  daily: { sent_today: number; daily_cap: number };
+  monthly: { sent_this_month: number; monthly_cap: number };
 };
 
 export type RecentCampaignsResponse = { items: CampaignSummary[] };

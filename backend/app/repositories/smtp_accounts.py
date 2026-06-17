@@ -68,3 +68,10 @@ def mark_failed(db: Session, account: SmtpAccount) -> SmtpAccount:
 def delete(db: Session, account: SmtpAccount) -> None:
     db.delete(account)
     db.commit()
+
+
+def lock(db: Session, account: SmtpAccount) -> SmtpAccount:
+    account.is_locked = True
+    db.commit()
+    db.refresh(account)
+    return account
