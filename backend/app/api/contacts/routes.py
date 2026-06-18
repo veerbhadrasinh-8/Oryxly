@@ -10,6 +10,7 @@ from app.models.contact import Contact
 from app.models.user import User
 from app.repositories import contacts as contacts_repo, usage as usage_repo
 from app.schemas.contacts import (
+    ContactListColumnsResponse,
     ContactListCreate,
     ContactListDetail,
     ContactListSummary,
@@ -181,6 +182,19 @@ async def upload_contacts(
             ],
         )
     )
+
+
+@router.get("/contact-lists/{list_id}/columns", response_model=ContactListColumnsResponse)
+def get_contact_list_columns(
+    list_id: UUID,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ContactListColumnsResponse:
+    cl = contacts_repo.get_owned(db, user_id=user.id, list_id=list_id)
+    if cl is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="contact list not found")
+    custom = contacts_repo.get_custom_columns(db, list_id=list_id)
+    return ContactListColumnsResponse(custom=custom)
 
 
 def _summary(cl) -> ContactListSummary:  # type: ignore[no-untyped-def]

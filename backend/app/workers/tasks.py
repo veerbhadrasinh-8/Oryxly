@@ -44,7 +44,7 @@ from app.models.smtp_account import SmtpAccount
 from app.models.template import Template
 from app.models.user import User
 from app.services.smtp import SmtpCreds, SmtpError, send_message
-from app.services.templates import render
+from app.services.templates import build_contact_render_data, render
 
 log = logging.getLogger(__name__)
 
@@ -132,24 +132,37 @@ def send_recipient(self, recipient_id: str) -> dict:
             return {"ok": True, "reason": "campaign no longer active"}
 
         contact = db.get(Contact, rec.contact_id)
-        tpl = db.get(Template, c.template_id)
         smtp = db.get(SmtpAccount, c.smtp_account_id)
         user = db.get(User, c.user_id)
-        if not (contact and tpl and smtp and user):
-            _mark_failed(db, rec, c, "missing config (contact/template/smtp/user)")
+        if not (contact and smtp and user):
+            _mark_failed(db, rec, c, "missing config (contact/smtp/user)")
             _maybe_finalize(db, c.id)
             return {"ok": False, "reason": "missing config"}
 
-        # Render template with per-contact data
-        data = {
-            "name": contact.name or "",
-            "company": contact.company or "",
-            "email": contact.email,
-        }
-        subject = render(tpl.subject, data)
-        html_body = render(tpl.html_body, data)
+        # Build per-contact variable dict. Custom data keys are normalized
+        # ('Company Name' → 'company_name') to match the template variables.
+        data = build_contact_render_data(contact)
 
-        # Build creds and send
+        # Inline content (new campaigns). Fall back to template for old campaigns.
+        if c.html_body:
+            subject = render(c.subject or "", data)
+            html_body = render(c.html_body, data)
+        else:
+            tpl = db.get(Template, c.template_id) if c.template_id else None
+            if tpl is None:
+                _mark_failed(db, rec, c, "campaign has no content (template deleted or missing)")
+                _maybe_finalize(db, c.id)
+                return {"ok": False, "reason": "missing template"}
+            subject = render(tpl.subject, data)
+            html_body = render(tpl.html_body, data)
+
+        # Resolve recipient address: use the to_variable value if set, else contact.email
+        to_email: str = contact.email
+        if c.to_variable:
+            resolved = data.get(c.to_variable)
+            if resolved:
+                to_email = resolved
+
         creds = SmtpCreds(
             host=smtp.smtp_host,
             port=smtp.smtp_port,
@@ -197,7 +210,7 @@ def send_recipient(self, recipient_id: str) -> dict:
         try:
             send_message(
                 creds,
-                to_email=contact.email,
+                to_email=to_email,
                 subject=subject,
                 html_body=html_body,
                 attachments=attachments_payload,

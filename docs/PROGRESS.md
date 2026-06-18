@@ -17,8 +17,9 @@ Living log of what was actually built in each phase. Updated when a phase exits.
 | 11 | Security Hardening | ✅ Complete | 2026-06-03 |
 | 12 | Testing & Launch | ✅ Complete | 2026-06-03 |
 | 13 | Invite-only + Admin + Monthly quota | ✅ Complete | 2026-06-17 |
+| 14 | Dynamic Campaign System + Production Audit | ✅ Complete | 2026-06-18 |
 
-**🚀 All 12 phases complete. MVP shipped.** Post-MVP commercial layer added in Phase 13.
+**🚀 All 12 phases complete. MVP shipped.** Post-MVP commercial layer added in Phase 13. Dynamic inline campaign system added in Phase 14.
 
 ---
 
@@ -1568,6 +1569,130 @@ The spec's success criteria (PRD §5):
 - ✅ User can register, log in, connect SMTP, upload contacts, create templates, launch campaigns, deliver emails, view logs, see dashboard metrics
 - ✅ System ready to support first 5 paying customers (acceptance criterion §16)
 - ⏳ Production deployment stable — depends on the user running through DEPLOY.md against their Railway + Vercel accounts
+
+---
+
+---
+
+## Phase 14 — Dynamic Campaign System + Production Audit ✅
+
+**Completed:** 2026-06-18
+**Spec refs:** Directed by product owner — no corresponding ai-context/ spec. Diverges from Phase 5/6 template-selection model.
+
+### What we built
+
+**Dynamic inline campaign content (removes predefined template system)**
+
+Templates are no longer selected during campaign creation. Campaigns now own their content inline: subject, html_body, to_variable, selected_columns. Template management still exists in the DB and API for backward compat with old campaigns, but is removed from the nav.
+
+New campaign creation wizard: **Name → Sender → Audience → Variables → Content → Review** (was Name → Sender → Audience → Content → Review with template select).
+
+**Backend**
+
+`app/models/campaign.py` — added 4 new columns:
+- `subject: Text (nullable)`
+- `html_body: Text (nullable)`
+- `to_variable: String(255) (nullable)`
+- `selected_columns: ARRAY(String) (nullable)`
+- `template_id` changed to nullable with `ON DELETE SET NULL`
+
+`alembic/versions/f3c8a2e1b7d9_add_inline_campaign_content.py` — migration applied (down_revision = `092133ef008c`).
+
+`app/services/templates.py` — added:
+- `normalize_var(col)` — `'Company Name' → 'company_name'`. Algorithm matches TypeScript `normalizeVar()` exactly.
+- `build_contact_render_data(contact)` — builds render dict from ORM Contact: custom_data keys normalized, builtins always override.
+- Updated `_VAR_PATTERN` to lowercase-only: `r"\{\{\s*([a-z][a-z0-9_]*)\s*\}\}"`.
+
+`app/repositories/contacts.py` — added `get_sample_contact(db, *, list_id)` for preview.
+
+`app/schemas/campaigns.py` — complete rewrite:
+- `CampaignCreate`: `subject`, `html_body`, `to_variable`, `selected_columns` (no `template_id`)
+- `CampaignDetail`: same inline fields, no template fields
+- `CampaignPreviewRequest` + `CampaignPreviewResponse` (new)
+
+`app/api/campaigns/routes.py` — complete rewrite:
+- `POST /campaigns/preview` added (before `/{campaign_id}` routes — FastAPI path ordering critical)
+- Variable validation in create: used vars in subject/body must all be in `selected_columns`; `to_variable` must be in `selected_columns`
+- Templates repo import removed entirely
+
+`app/repositories/campaigns.py`:
+- `create_with_recipients` signature changed to inline fields
+- `count_started_this_month` now includes `CANCELLED` in the counted statuses — prevents gaming monthly cap via delete+recreate
+
+`app/core/rate_limits.py` — all Redis calls wrapped in try/except so Redis failure doesn't crash dashboard or workers (fail-open).
+
+`app/workers/tasks.py` — backward-compat render logic:
+- If `c.html_body` exists: render subject + body from inline content
+- Else: fall back to Template model via `c.template_id` (old campaigns)
+- `to_email` resolved from `data.get(c.to_variable)` if set, else `contact.email`
+
+**Frontend**
+
+`src/features/campaigns/CampaignWizard.tsx` — complete rewrite (6 steps):
+- `VariableStep`: fetches columns via `getContactListColumns`, shows checkboxes, auto-selects all, displays `{{var}}` tokens
+- `ContentStep`: to_variable dropdown, subject + body inputs, variable chip insertion, unknown var validation (blocks advance)
+- `ReviewStep`: calls `POST /campaigns/preview`, renders result in sandboxed iframe
+- `normalizeVar()`: `col.trim().toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'')`
+
+`src/types/campaigns.ts` — `CampaignDetail`, `CampaignCreatePayload` updated; `CampaignPreviewPayload`/`CampaignPreviewResult` added.
+
+`src/features/campaigns/api.ts` — `previewCampaignContent()` added.
+
+`src/components/AppNav.tsx` — Templates link removed.
+
+`src/app/campaigns/[id]/page.tsx` — shows `to_variable` + `selected_columns` chips; removed template fields; `Row` value typed `string | undefined`.
+
+`src/app/dashboard/page.tsx`:
+- Full error state with Retry button when `summaryQ.error`
+- Templates QuickAction removed
+- Campaign mutations invalidate `["dashboard"]` queryKey
+
+`src/features/contacts/ContactListsTable.tsx` — fixed React key prop warning: `<>` fragments → `<React.Fragment key={cl.id}>`.
+
+**Production audit findings (all fixed)**
+
+Critical: `to_variable` was not validated against `selected_columns` in `create_campaign` → attacker could set any string as the email column → added `payload.to_variable not in selected_set → 422` check.
+
+TypeScript: 0 errors after fixes. Backend: running clean (`INFO: Application startup complete.`).
+
+### Verified evidence
+
+- `alembic upgrade head` → `f3c8a2e1b7d9 (head)`, all migrations clean
+- `tsc --noEmit` → 0 errors
+- Backend `docker logs oryxly-backend-1` → `INFO: Application startup complete.`
+- All 5 services running: backend, frontend, postgres (healthy), redis (healthy), worker
+
+### Decisions / deviations
+
+- **Templates table preserved.** Old campaigns with `template_id` still render correctly via backward-compat fallback in worker. The `/templates` API routes remain but are unreachable from the UI.
+- **Variable normalization identical on both sides.** `normalize_var` (Python) and `normalizeVar` (TypeScript) use the same algorithm so DB-stored column names always match UI-rendered `{{var}}` tokens.
+- **`CANCELLED` in monthly cap count.** Prevents delete+recreate abuse of the monthly campaign limit.
+- **Redis fail-open.** Rate limiter Redis errors return `True`/`0` instead of crashing — Redis outage doesn't block sends or dashboard.
+- **Preview in sandboxed iframe.** `<iframe srcDoc sandbox="allow-same-origin">` prevents CSS/JS from the user's html_body bleeding into the wizard UI.
+
+### Files added/changed
+
+```
+backend/
+  app/models/campaign.py                          (+ 4 inline content columns, template_id nullable)
+  app/services/templates.py                       (+ normalize_var, build_contact_render_data, updated _VAR_PATTERN)
+  app/repositories/contacts.py                    (+ get_sample_contact)
+  app/repositories/campaigns.py                   (create_with_recipients inline fields; count_started includes CANCELLED)
+  app/schemas/campaigns.py                        (rewrite — inline content, preview types)
+  app/api/campaigns/routes.py                     (rewrite — preview endpoint, inline validation)
+  app/workers/tasks.py                            (backward-compat render, to_variable resolution)
+  app/core/rate_limits.py                         (Redis try/except fail-open)
+  alembic/versions/f3c8a2e1b7d9_*.py             (new — inline campaign content migration)
+
+frontend/
+  src/types/campaigns.ts                          (inline fields, preview types)
+  src/features/campaigns/api.ts                   (+ previewCampaignContent)
+  src/features/campaigns/CampaignWizard.tsx        (rewrite — 6-step wizard with variable selection)
+  src/components/AppNav.tsx                       (removed Templates link)
+  src/app/campaigns/[id]/page.tsx                 (inline content display, Row value type fix)
+  src/app/dashboard/page.tsx                      (error state, removed Templates QuickAction)
+  src/features/contacts/ContactListsTable.tsx      (React.Fragment key fix)
+```
 
 ---
 

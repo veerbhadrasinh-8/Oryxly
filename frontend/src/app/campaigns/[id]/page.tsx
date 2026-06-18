@@ -39,6 +39,7 @@ function Detail({ id }: { id: string }) {
     mutationFn: () => launchCampaign(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["campaigns"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
       refetch();
     },
     onError: (e) => alert(extractError(e)),
@@ -47,6 +48,7 @@ function Detail({ id }: { id: string }) {
     mutationFn: () => cancelCampaign(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["campaigns"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
       refetch();
     },
     onError: (e) => alert(extractError(e)),
@@ -55,6 +57,7 @@ function Detail({ id }: { id: string }) {
     mutationFn: () => deleteCampaign(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["campaigns"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
       router.replace("/campaigns");
     },
     onError: (e) => alert(extractError(e)),
@@ -148,25 +151,34 @@ function Detail({ id }: { id: string }) {
       <section className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-6 space-y-3">
         <h2 className="text-sm font-medium uppercase text-neutral-500">Configuration</h2>
         <dl className="grid grid-cols-2 gap-y-3 gap-x-6 text-sm">
-          <Row
-            label="Sender"
-            value={data.smtp_email}
-            mono
-            href={`/smtp`}
-          />
-          <Row
-            label="Contact list"
-            value={data.list_name}
-            href={`/contacts/${data.list_id}`}
-          />
-          <Row
-            label="Template"
-            value={data.template_name}
-            href={`/templates/${data.template_id}`}
-          />
+          <Row label="Sender" value={data.smtp_email} mono href="/smtp" />
+          <Row label="Contact list" value={data.list_name} href={`/contacts/${data.list_id}`} />
+          <Row label="To variable" value={data.to_variable ? `{{${data.to_variable}}}` : undefined} mono />
           <Row label="Created" value={new Date(data.created_at).toLocaleString()} />
         </dl>
       </section>
+
+      {data.subject && (
+        <section className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-6 space-y-3">
+          <h2 className="text-sm font-medium uppercase text-neutral-500">Email content</h2>
+          <div className="space-y-1">
+            <div className="text-xs text-neutral-500">Subject</div>
+            <div className="text-sm font-medium">{data.subject}</div>
+          </div>
+          {data.selected_columns && data.selected_columns.length > 0 && (
+            <div className="space-y-1">
+              <div className="text-xs text-neutral-500">Variables</div>
+              <div className="flex flex-wrap gap-1.5">
+                {data.selected_columns.map((v) => (
+                  <span key={v} className="rounded px-2 py-0.5 text-xs font-mono bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300">
+                    {`{{${v}}}`}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       {data.status === "queued" && (
         <div className="rounded-md border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/20 px-4 py-3 text-sm">
@@ -299,12 +311,12 @@ function Row({
   href,
 }: {
   label: string;
-  value: string;
+  value: string | undefined;
   mono?: boolean;
   href?: string;
 }) {
   const content = (
-    <span className={mono ? "font-mono" : ""}>{value}</span>
+    <span className={mono ? "font-mono" : ""}>{value ?? "—"}</span>
   );
   return (
     <div className="space-y-0.5">

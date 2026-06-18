@@ -65,6 +65,15 @@ PHONE_KEYS = {
 
 KNOWN_KEYS = EMAIL_KEYS | NAME_KEYS | COMPANY_KEYS | PHONE_KEYS
 
+# Header detection: scan the first N rows; pick the one with the most
+# cells that match known header keywords. Handles files that have a title
+# row (or blank rows) before the actual column headers.
+_MAX_HEADER_SCAN = 6
+
+
+def _score_row_as_header(cells: list[str]) -> int:
+    return sum(1 for c in cells if c.strip().lower() in KNOWN_KEYS)
+
 
 class ParseError(ValueError):
     """Raised when the uploaded file can't be parsed at all."""
@@ -163,12 +172,20 @@ def _read_xlsx(content: bytes) -> list[dict[str, str]]:
     ws = wb.active
     if ws is None:
         raise ParseError("XLSX has no sheets")
-    headers: list[str] | None = None
+
+    # Read all rows eagerly (ws is read-only, can't seek back)
+    all_rows = list(ws.iter_rows(values_only=True))
+    if not all_rows:
+        raise ParseError("XLSX has no rows")
+
+    # Find the header row — the row with most cells matching known column names
+    candidate_rows = all_rows[:_MAX_HEADER_SCAN]
+    str_candidates = [[str(c).strip() if c is not None else "" for c in row] for row in candidate_rows]
+    header_idx = max(range(len(str_candidates)), key=lambda i: _score_row_as_header(str_candidates[i]))
+    headers = str_candidates[header_idx]
+
     out: list[dict[str, str]] = []
-    for row in ws.iter_rows(values_only=True):
-        if headers is None:
-            headers = [str(c).strip() if c is not None else "" for c in row]
-            continue
+    for row in all_rows[header_idx + 1:]:
         rec: dict[str, str] = {}
         for i, cell in enumerate(row):
             if i >= len(headers) or not headers[i]:
@@ -187,9 +204,18 @@ def _read_xls(content: bytes) -> list[dict[str, str]]:
     sheet = wb.sheet_by_index(0)
     if sheet.nrows < 1:
         raise ParseError("XLS has no rows")
-    headers = [str(sheet.cell_value(0, c)).strip() for c in range(sheet.ncols)]
+
+    # Find the header row — the row with most cells matching known column names
+    scan_end = min(_MAX_HEADER_SCAN, sheet.nrows)
+    str_rows = [
+        [str(sheet.cell_value(r, c)).strip() for c in range(sheet.ncols)]
+        for r in range(scan_end)
+    ]
+    header_idx = max(range(len(str_rows)), key=lambda i: _score_row_as_header(str_rows[i]))
+    headers = str_rows[header_idx]
+
     out: list[dict[str, str]] = []
-    for r in range(1, sheet.nrows):
+    for r in range(header_idx + 1, sheet.nrows):
         rec: dict[str, str] = {}
         for c in range(sheet.ncols):
             if not headers[c]:

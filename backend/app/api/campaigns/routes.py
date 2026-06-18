@@ -14,18 +14,20 @@ from app.repositories import (
     campaigns as campaigns_repo,
     contacts as contacts_repo,
     smtp_accounts as smtp_repo,
-    templates as templates_repo,
 )
 from app.schemas.campaigns import (
     CampaignCreate,
     CampaignCreateResponse,
     CampaignDetail,
     CampaignListResponse,
+    CampaignPreviewRequest,
+    CampaignPreviewResponse,
     CampaignSummary,
     CancelResponse,
     DeleteResponse,
     LaunchResponse,
 )
+from app.services.templates import build_contact_render_data, extract_variables, render
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
@@ -66,29 +68,60 @@ def list_campaigns(
     )
 
 
+@router.post("/preview", response_model=CampaignPreviewResponse)
+def preview_campaign(
+    payload: CampaignPreviewRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> CampaignPreviewResponse:
+    cl = contacts_repo.get_owned(db, user_id=user.id, list_id=payload.contact_list_id)
+    if cl is None:
+        raise HTTPException(status_code=404, detail="contact list not found")
+    contact = contacts_repo.get_sample_contact(db, list_id=cl.id)
+    if contact is None:
+        raise HTTPException(status_code=400, detail="contact list has no contacts")
+    data = build_contact_render_data(contact)
+    to_email = data.get(payload.to_variable) or contact.email
+    return CampaignPreviewResponse(
+        to=to_email,
+        subject=render(payload.subject, data),
+        html_body=render(payload.html_body, data),
+    )
+
+
 @router.post("", response_model=CampaignCreateResponse, status_code=status.HTTP_201_CREATED)
 def create_campaign(
     payload: CampaignCreate,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> CampaignCreateResponse:
-    # Ownership checks across all three foreign keys
-    tpl = templates_repo.get_owned(db, user_id=user.id, template_id=payload.template_id)
-    if tpl is None:
-        raise HTTPException(status_code=404, detail="template not found")
     smtp = smtp_repo.get_owned(db, user_id=user.id, smtp_id=payload.smtp_account_id)
     if smtp is None:
         raise HTTPException(status_code=404, detail="SMTP account not found")
     if smtp.status != SmtpStatus.ACTIVE:
-        raise HTTPException(
-            status_code=400, detail="SMTP account is not active — verify it first"
-        )
+        raise HTTPException(status_code=400, detail="SMTP account is not active — verify it first")
+
     cl = contacts_repo.get_owned(db, user_id=user.id, list_id=payload.contact_list_id)
     if cl is None:
         raise HTTPException(status_code=404, detail="contact list not found")
     if cl.valid_contacts == 0:
+        raise HTTPException(status_code=400, detail="contact list has no valid recipients")
+
+    # Validate all variables used in subject/body are in selected_columns
+    selected_set = set(payload.selected_columns)
+    used_vars = extract_variables(payload.subject, payload.html_body)
+    unknown = [v for v in used_vars if v not in selected_set]
+    if unknown:
         raise HTTPException(
-            status_code=400, detail="contact list has no valid recipients"
+            status_code=422,
+            detail=f"unknown variables: {', '.join('{{' + v + '}}' for v in unknown)}. "
+                   f"Only selected columns can be used as variables.",
+        )
+    # Validate to_variable is in selected_columns so the recipient address resolves
+    if payload.to_variable not in selected_set:
+        raise HTTPException(
+            status_code=422,
+            detail=f"to_variable '{{{{ {payload.to_variable} }}}}' is not in selected_columns.",
         )
 
     contact_ids = campaigns_repo.list_contact_ids_for_list(db, cl.id)
@@ -99,10 +132,13 @@ def create_campaign(
         db,
         user_id=user.id,
         name=payload.name.strip()[:255],
-        template_id=tpl.id,
         smtp_account_id=smtp.id,
         list_id=cl.id,
         contact_ids=contact_ids,
+        subject=payload.subject,
+        html_body=payload.html_body,
+        to_variable=payload.to_variable,
+        selected_columns=payload.selected_columns,
     )
     return CampaignCreateResponse(campaign_id=c.id)
 
@@ -116,20 +152,19 @@ def get_campaign(
     c = campaigns_repo.get_owned(db, user_id=user.id, campaign_id=campaign_id)
     if c is None:
         raise HTTPException(status_code=404, detail="campaign not found")
-    # Reconcile counters against the recipient table so any drift from a
-    # race between cancel and an in-flight send is corrected on read.
     campaigns_repo.reconcile_counters(db, c.id)
     db.refresh(c)
 
-    tpl = templates_repo.get_owned(db, user_id=user.id, template_id=c.template_id)
     smtp = smtp_repo.get_owned(db, user_id=user.id, smtp_id=c.smtp_account_id)
     cl = contacts_repo.get_owned(db, user_id=user.id, list_id=c.list_id)
 
     base = _summary(c).model_dump()
     return CampaignDetail(
         **base,
-        template_id=c.template_id,
-        template_name=tpl.name if tpl else "(deleted)",
+        subject=c.subject,
+        html_body=c.html_body,
+        to_variable=c.to_variable,
+        selected_columns=c.selected_columns,
         smtp_account_id=c.smtp_account_id,
         smtp_email=smtp.email if smtp else "(deleted)",
         list_id=c.list_id,
@@ -148,41 +183,29 @@ def launch_campaign(
     c = campaigns_repo.get_owned(db, user_id=user.id, campaign_id=campaign_id)
     if c is None:
         raise HTTPException(status_code=404, detail="campaign not found")
-    # Allow re-launch from QUEUED (recovery from network errors / orphaned launches).
-    # The worker handles either status, and start_campaign is idempotent on
-    # already-running campaigns.
     if c.status not in (CampaignStatus.DRAFT, CampaignStatus.QUEUED):
         raise HTTPException(
             status_code=400,
             detail=f"only draft or queued campaigns can be launched (current: {c.status.value})",
         )
 
-    # Plan limit on launched-this-month
     limit = CAMPAIGNS_PER_MONTH_LIMIT.get(user.plan)
     if limit is not None:
         used = campaigns_repo.count_started_this_month(db, user.id)
-        # Don't count this campaign itself against the cap if it's already queued
         if c.status == CampaignStatus.DRAFT and used >= limit:
             raise HTTPException(
                 status_code=403,
                 detail=f"plan '{user.plan.value}' allows {limit} launched campaigns per month (used {used})",
             )
 
-    # Re-verify SMTP still active
     smtp = smtp_repo.get_owned(db, user_id=user.id, smtp_id=c.smtp_account_id)
     if smtp is None or smtp.status != SmtpStatus.ACTIVE:
-        raise HTTPException(
-            status_code=400, detail="SMTP account is no longer active — re-verify it"
-        )
+        raise HTTPException(status_code=400, detail="SMTP account is no longer active — re-verify it")
 
-    # Enqueue FIRST so we don't transition the DB if Celery is unreachable.
-    # If enqueue raises, status stays draft → user can simply retry.
-    from app.workers.tasks import start_campaign  # local import keeps worker deps out of API boot
+    from app.workers.tasks import start_campaign
 
     start_campaign.delay(str(c.id))
     if c.status == CampaignStatus.DRAFT:
-        # Conditional UPDATE so we don't clobber a RUNNING transition that
-        # a fast worker may already have committed before us.
         campaigns_repo.transition_to_queued_if_draft(db, c.id)
         db.refresh(c)
     audit(db, action="campaign.launch", user_id=user.id, request=request,
@@ -202,10 +225,7 @@ def cancel_campaign(
     if c is None:
         raise HTTPException(status_code=404, detail="campaign not found")
     if c.status not in (CampaignStatus.DRAFT, CampaignStatus.QUEUED, CampaignStatus.RUNNING):
-        raise HTTPException(
-            status_code=400,
-            detail=f"can't cancel from status {c.status.value}",
-        )
+        raise HTTPException(status_code=400, detail=f"can't cancel from status {c.status.value}")
     campaigns_repo.cancel_remaining_recipients(db, c.id)
     campaigns_repo.set_status(db, c, CampaignStatus.CANCELLED, completed=True)
     audit(db, action="campaign.cancel", user_id=user.id, request=request,
@@ -224,9 +244,7 @@ def delete_campaign(
     if c is None:
         raise HTTPException(status_code=404, detail="campaign not found")
     if c.status == CampaignStatus.RUNNING:
-        raise HTTPException(
-            status_code=400, detail="cancel a running campaign before deleting"
-        )
+        raise HTTPException(status_code=400, detail="cancel a running campaign before deleting")
     campaigns_repo.delete(db, c)
     audit(db, action="campaign.delete", user_id=user.id, request=request,
           target_type="campaign", target_id=campaign_id)

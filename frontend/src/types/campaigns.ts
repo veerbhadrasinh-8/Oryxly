@@ -19,8 +19,10 @@ export type CampaignSummary = {
 };
 
 export type CampaignDetail = CampaignSummary & {
-  template_id: string;
-  template_name: string;
+  subject: string | null;
+  html_body: string | null;
+  to_variable: string | null;
+  selected_columns: string[] | null;
   smtp_account_id: string;
   smtp_email: string;
   list_id: string;
@@ -37,7 +39,23 @@ export type CampaignListResponse = {
 
 export type CampaignCreatePayload = {
   name: string;
-  template_id: string;
   smtp_account_id: string;
   contact_list_id: string;
+  subject: string;
+  html_body: string;
+  to_variable: string;
+  selected_columns: string[];
+};
+
+export type CampaignPreviewPayload = {
+  contact_list_id: string;
+  subject: string;
+  html_body: string;
+  to_variable: string;
+};
+
+export type CampaignPreviewResult = {
+  to: string;
+  subject: string;
+  html_body: string;
 };

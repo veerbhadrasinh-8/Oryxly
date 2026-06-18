@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 import type {
+  ContactListColumns,
   ContactListDetail,
   ContactListSummary,
   UploadResponse,
@@ -25,4 +26,9 @@ export async function uploadContacts(file: File, name?: string) {
   if (name) form.append("name", name);
   const { data } = await api.post<UploadResponse>("/contacts/upload", form);
   return data.data;
+}
+
+export async function getContactListColumns(listId: string) {
+  const { data } = await api.get<ContactListColumns>(`/contact-lists/${listId}/columns`);
+  return data;
 }

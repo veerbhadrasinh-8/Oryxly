@@ -3,6 +3,8 @@ import type {
   CampaignCreatePayload,
   CampaignDetail,
   CampaignListResponse,
+  CampaignPreviewPayload,
+  CampaignPreviewResult,
   CampaignStatus,
 } from "@/types/campaigns";
 
@@ -29,6 +31,14 @@ export async function getCampaign(id: string) {
 export async function createCampaign(payload: CampaignCreatePayload) {
   const { data } = await api.post<{ success: true; campaign_id: string }>(
     "/campaigns",
+    payload,
+  );
+  return data;
+}
+
+export async function previewCampaignContent(payload: CampaignPreviewPayload) {
+  const { data } = await api.post<CampaignPreviewResult>(
+    "/campaigns/preview",
     payload,
   );
   return data;

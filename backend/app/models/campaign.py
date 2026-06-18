@@ -2,8 +2,8 @@ import uuid
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, Integer, String, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, Integer, String, Text, func
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.session import Base
@@ -32,8 +32,9 @@ class Campaign(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
     )
-    template_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("templates.id", ondelete="RESTRICT"), nullable=False
+    # Nullable: old campaigns reference a template; new campaigns use inline fields below.
+    template_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("templates.id", ondelete="SET NULL"), nullable=True
     )
     smtp_account_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("smtp_accounts.id", ondelete="RESTRICT"), nullable=False
@@ -42,6 +43,15 @@ class Campaign(Base):
         UUID(as_uuid=True), ForeignKey("contact_lists.id", ondelete="RESTRICT"), nullable=False
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    # Inline content (new campaigns). Rendered per-contact at send time.
+    subject: Mapped[str | None] = mapped_column(Text, nullable=True)
+    html_body: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Normalized variable name that maps to the recipient email address (e.g. "email", "email_address").
+    to_variable: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Normalized column names the user selected as template variables.
+    selected_columns: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
+
     status: Mapped[CampaignStatus] = mapped_column(
         SAEnum(CampaignStatus, name="campaign_status_enum", values_callable=lambda e: [m.value for m in e]),
         default=CampaignStatus.DRAFT,

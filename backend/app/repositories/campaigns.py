@@ -61,6 +61,7 @@ def count_started_this_month(db: Session, user_id: UUID) -> int:
                         CampaignStatus.QUEUED,
                         CampaignStatus.RUNNING,
                         CampaignStatus.COMPLETED,
+                        CampaignStatus.CANCELLED,
                     ]
                 ),
             )
@@ -73,18 +74,24 @@ def create_with_recipients(
     *,
     user_id: UUID,
     name: str,
-    template_id: UUID,
     smtp_account_id: UUID,
     list_id: UUID,
     contact_ids: list[UUID],
+    subject: str,
+    html_body: str,
+    to_variable: str,
+    selected_columns: list[str],
 ) -> Campaign:
     """One transaction: campaign + recipients + total count."""
     c = Campaign(
         user_id=user_id,
-        template_id=template_id,
         smtp_account_id=smtp_account_id,
         list_id=list_id,
         name=name,
+        subject=subject,
+        html_body=html_body,
+        to_variable=to_variable,
+        selected_columns=selected_columns,
         total_recipients=len(contact_ids),
     )
     db.add(c)

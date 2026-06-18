@@ -6,9 +6,25 @@ from pydantic import BaseModel, Field
 
 class CampaignCreate(BaseModel):
     name: str = Field(min_length=1, max_length=255)
-    template_id: UUID
     smtp_account_id: UUID
     contact_list_id: UUID
+    subject: str = Field(min_length=1)
+    html_body: str = Field(min_length=1)
+    to_variable: str = Field(min_length=1, max_length=255)
+    selected_columns: list[str] = Field(min_length=1)
+
+
+class CampaignPreviewRequest(BaseModel):
+    contact_list_id: UUID
+    subject: str
+    html_body: str
+    to_variable: str
+
+
+class CampaignPreviewResponse(BaseModel):
+    to: str
+    subject: str
+    html_body: str
 
 
 class CampaignSummary(BaseModel):
@@ -24,8 +40,10 @@ class CampaignSummary(BaseModel):
 
 
 class CampaignDetail(CampaignSummary):
-    template_id: UUID
-    template_name: str
+    subject: str | None
+    html_body: str | None
+    to_variable: str | None
+    selected_columns: list[str] | None
     smtp_account_id: UUID
     smtp_email: str
     list_id: UUID

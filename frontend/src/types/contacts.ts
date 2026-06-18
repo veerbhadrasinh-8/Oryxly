@@ -36,3 +36,8 @@ export type UploadResponse = {
     invalid_preview: UploadInvalidRow[];
   };
 };
+
+export type ContactListColumns = {
+  builtin: string[];
+  custom: string[];
+};

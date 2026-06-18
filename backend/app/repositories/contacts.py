@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import desc, func, select
+from sqlalchemy import desc, func, select, text
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.contact import Contact, ContactList
@@ -103,3 +103,24 @@ def update_counts(
 def delete_list(db: Session, cl: ContactList) -> None:
     db.delete(cl)
     db.commit()
+
+
+def get_sample_contact(db: Session, *, list_id: UUID) -> "Contact | None":
+    """Return the first valid contact in a list, used for preview rendering."""
+    return db.execute(
+        select(Contact).where(Contact.list_id == list_id).limit(1)
+    ).scalar_one_or_none()
+
+
+def get_custom_columns(db: Session, *, list_id: UUID) -> list[str]:
+    """Return sorted unique keys across all custom_data JSONB objects for a list."""
+    rows = db.execute(
+        text(
+            "SELECT DISTINCT jsonb_object_keys(custom_data) AS k "
+            "FROM contacts "
+            "WHERE list_id = :list_id AND custom_data IS NOT NULL "
+            "ORDER BY k"
+        ),
+        {"list_id": str(list_id)},
+    ).fetchall()
+    return [row[0] for row in rows]

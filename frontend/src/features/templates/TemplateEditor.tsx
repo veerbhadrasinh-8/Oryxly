@@ -7,8 +7,8 @@ import { isAxiosError } from "axios";
 import { createTemplate, updateTemplate } from "./api";
 import type { Template } from "@/types/templates";
 
-const KNOWN = ["name", "company", "email"] as const;
-const VAR_PATTERN = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
+const BUILTIN_VARS = ["name", "company", "email"] as const;
+const VAR_PATTERN = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_ ]*)\s*\}\}/g;
 
 const STARTER_HTML =
   "<p>Hi {{name}},</p>\n<p>I came across {{company}} and thought MailFlow could help your outreach.</p>\n<p>Best,<br>Your name</p>";
@@ -20,10 +20,16 @@ type Mode =
 function extractVars(...texts: string[]): string[] {
   const seen = new Set<string>();
   for (const t of texts) {
-    for (const m of (t ?? "").matchAll(VAR_PATTERN)) seen.add(m[1]);
+    for (const m of (t ?? "").matchAll(VAR_PATTERN)) seen.add(m[1].trim());
   }
   return [...seen];
 }
+
+const DEFAULT_SAMPLE: Record<string, string> = {
+  name: "Alice Sharma",
+  company: "Acme Exports",
+  email: "alice@acme.com",
+};
 
 export function TemplateEditor({ mode }: { mode: Mode }) {
   const router = useRouter();
@@ -32,10 +38,10 @@ export function TemplateEditor({ mode }: { mode: Mode }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [subject, setSubject] = useState(initial?.subject ?? "");
   const [body, setBody] = useState(initial?.html_body ?? STARTER_HTML);
-  const [sampleName, setSampleName] = useState("Alice Sharma");
-  const [sampleCompany, setSampleCompany] = useState("Acme Exports");
-  const [sampleEmail, setSampleEmail] = useState("alice@acme.com");
   const [error, setError] = useState<string | null>(null);
+
+  // Sample data: starts with defaults, grows as user adds {{custom_vars}}
+  const [sampleData, setSampleData] = useState<Record<string, string>>(DEFAULT_SAMPLE);
 
   useEffect(() => {
     if (initial) {
@@ -46,12 +52,21 @@ export function TemplateEditor({ mode }: { mode: Mode }) {
   }, [initial]);
 
   const detected = useMemo(() => extractVars(subject, body), [subject, body]);
-  const unknown = useMemo(() => detected.filter((v) => !KNOWN.includes(v as typeof KNOWN[number])), [detected]);
 
-  const sampleData = useMemo(
-    () => ({ name: sampleName, company: sampleCompany, email: sampleEmail }),
-    [sampleName, sampleCompany, sampleEmail],
-  );
+  // Auto-add sample data fields for any newly detected variable
+  useEffect(() => {
+    setSampleData((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const v of detected) {
+        if (!(v in next)) {
+          next[v] = "";
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [detected]);
 
   const previewSubject = useMemo(() => renderLocal(subject, sampleData), [subject, sampleData]);
   const previewBody = useMemo(() => renderLocal(body, sampleData), [body, sampleData]);
@@ -149,8 +164,8 @@ export function TemplateEditor({ mode }: { mode: Mode }) {
             <label className="text-sm font-medium" htmlFor="tpl-body">
               HTML body
             </label>
-            <div className="flex gap-1.5">
-              {KNOWN.map((v) => (
+            <div className="flex gap-1.5 flex-wrap">
+              {BUILTIN_VARS.map((v) => (
                 <button
                   type="button"
                   key={v}
@@ -177,27 +192,20 @@ export function TemplateEditor({ mode }: { mode: Mode }) {
             <p className="text-xs text-neutral-500">None yet — wrap text in {`{{ }}`}.</p>
           ) : (
             <div className="flex flex-wrap gap-1.5">
-              {detected.map((v) => {
-                const isUnknown = unknown.includes(v);
-                return (
-                  <span
-                    key={v}
-                    className={`rounded px-2 py-0.5 text-xs font-mono ${
-                      isUnknown
-                        ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
-                        : "bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
-                    }`}
-                    title={isUnknown ? "Not in supported variable set" : "Supported"}
-                  >
-                    {`{{${v}}}`}
-                  </span>
-                );
-              })}
+              {detected.map((v) => (
+                <span
+                  key={v}
+                  className="rounded px-2 py-0.5 text-xs font-mono bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+                  title="Will be filled from contact data at send time"
+                >
+                  {`{{${v}}}`}
+                </span>
+              ))}
             </div>
           )}
-          {unknown.length > 0 && (
-            <p className="text-xs text-amber-600 dark:text-amber-400">
-              {unknown.length} unknown variable{unknown.length > 1 ? "s" : ""} — these will render as empty unless added in a later phase.
+          {detected.length > 0 && (
+            <p className="text-xs text-neutral-500">
+              Variables are filled from contact data at send time. Any column from your uploaded CSV/XLS file works — use the exact column name.
             </p>
           )}
         </section>
@@ -228,11 +236,21 @@ export function TemplateEditor({ mode }: { mode: Mode }) {
 
       <aside className="space-y-4">
         <section className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3">
-          <h2 className="text-sm font-medium uppercase text-neutral-500">Sample data</h2>
-          <div className="grid gap-2 grid-cols-3 text-xs">
-            <SampleField label="name" value={sampleName} onChange={setSampleName} />
-            <SampleField label="company" value={sampleCompany} onChange={setSampleCompany} />
-            <SampleField label="email" value={sampleEmail} onChange={setSampleEmail} />
+          <div>
+            <h2 className="text-sm font-medium uppercase text-neutral-500">Sample data</h2>
+            <p className="text-xs text-neutral-400 mt-0.5">
+              Fields auto-expand as you add variables. Edit values to preview.
+            </p>
+          </div>
+          <div className="grid gap-2 grid-cols-2 text-xs">
+            {Object.keys(sampleData).map((key) => (
+              <SampleField
+                key={key}
+                label={key}
+                value={sampleData[key]}
+                onChange={(v) => setSampleData((prev) => ({ ...prev, [key]: v }))}
+              />
+            ))}
           </div>
         </section>
 
@@ -270,11 +288,12 @@ function SampleField({
 }) {
   return (
     <label className="block space-y-1">
-      <span className="text-neutral-500">{label}</span>
+      <span className="text-neutral-500 font-mono truncate block" title={label}>{label}</span>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded border border-neutral-300 dark:border-neutral-700 bg-transparent px-2 py-1 outline-none focus:border-neutral-900 dark:focus:border-neutral-200"
+        className="w-full rounded border border-neutral-300 dark:border-neutral-700 bg-transparent px-2 py-1 outline-none focus:border-neutral-900 dark:focus:border-neutral-200 text-xs"
+        placeholder={`sample ${label}`}
       />
     </label>
   );
@@ -284,5 +303,5 @@ const inputCls =
   "w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-transparent px-3 py-2 text-sm outline-none focus:border-neutral-900 dark:focus:border-neutral-200";
 
 function renderLocal(text: string, data: Record<string, string>): string {
-  return (text ?? "").replace(VAR_PATTERN, (_, key) => data[key] ?? "");
+  return (text ?? "").replace(VAR_PATTERN, (_, key) => data[key.trim()] ?? "");
 }

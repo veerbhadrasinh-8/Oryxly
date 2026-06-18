@@ -23,8 +23,11 @@ def _month_key(user_id: str) -> str:
 
 def get_sent_this_month(user_id: str) -> int:
     """Return how many sends the user has used in the current month."""
-    raw = redis_client.get(_month_key(user_id))
-    return int(raw) if raw else 0
+    try:
+        raw = redis_client.get(_month_key(user_id))
+        return int(raw) if raw else 0
+    except Exception:
+        return 0
 
 
 def reserve_send_slot(user_id: str, limit: int, *, want: int = 1) -> bool:
@@ -32,21 +35,29 @@ def reserve_send_slot(user_id: str, limit: int, *, want: int = 1) -> bool:
 
     Increments the counter first (atomic), then rolls back if the new total
     would exceed the limit. Returns True if the reservation succeeded.
+    On Redis failure, allows the send to proceed (fail-open) rather than
+    blocking all sends when Redis is temporarily unavailable.
     """
-    key = _month_key(user_id)
-    new_total = redis_client.incrby(key, want)
-    if new_total == want:
-        # First write this month — set expiry.
-        redis_client.expire(key, _KEY_TTL_SECONDS)
-    if new_total > limit:
-        redis_client.decrby(key, want)
-        return False
-    return True
+    try:
+        key = _month_key(user_id)
+        new_total = redis_client.incrby(key, want)
+        if new_total == want:
+            # First write this month — set expiry.
+            redis_client.expire(key, _KEY_TTL_SECONDS)
+        if new_total > limit:
+            redis_client.decrby(key, want)
+            return False
+        return True
+    except Exception:
+        return True
 
 
 def release_send_slot(user_id: str, *, want: int = 1) -> None:
     """Release a previously reserved slot (on send failure or retry)."""
-    key = _month_key(user_id)
-    current = redis_client.get(key)
-    if current and int(current) >= want:
-        redis_client.decrby(key, want)
+    try:
+        key = _month_key(user_id)
+        current = redis_client.get(key)
+        if current and int(current) >= want:
+            redis_client.decrby(key, want)
+    except Exception:
+        pass

@@ -58,3 +58,15 @@ class UploadResponse(BaseModel):
 
 class DeleteResponse(BaseModel):
     success: bool = True
+
+
+class ContactListColumnsResponse(BaseModel):
+    """All unique column names available in a contact list.
+
+    `builtin` are always present (name, company, email, phone).
+    `custom` are extra columns harvested from uploaded CSV/XLS files.
+    Together they form the full set of `{{variable}}` names usable in templates.
+    """
+
+    builtin: list[str] = ["name", "company", "email", "phone"]
+    custom: list[str]

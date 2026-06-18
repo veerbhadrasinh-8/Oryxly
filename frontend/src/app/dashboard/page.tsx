@@ -26,6 +26,27 @@ function DashboardInner() {
       ? Math.min(100, Math.round((s.monthly.sent_this_month / s.monthly.monthly_cap) * 100))
       : 0;
 
+  if (summaryQ.error) {
+    return (
+      <main className="mx-auto max-w-6xl px-6 py-12 font-sans">
+        <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 px-6 py-8 text-center space-y-2">
+          <p className="text-sm font-medium text-red-700 dark:text-red-400">
+            Dashboard failed to load
+          </p>
+          <p className="text-xs text-neutral-500">
+            The server returned an error. Check that the backend and Redis are running.
+          </p>
+          <button
+            onClick={() => summaryQ.refetch()}
+            className="mt-2 text-xs text-neutral-700 dark:text-neutral-300 underline"
+          >
+            Retry
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-12 font-sans space-y-8">
       <header className="flex items-center justify-between">
@@ -90,11 +111,6 @@ function DashboardInner() {
             title="Contacts"
             subtitle={s ? `${s.contact_lists} list${s.contact_lists === 1 ? "" : "s"}` : ""}
           />
-          <QuickAction
-            href="/templates"
-            title="Templates"
-            subtitle={s ? `${s.templates} saved` : ""}
-          />
           <QuickAction href="/logs" title="Send logs" subtitle="filter + search" />
         </div>
       </section>
@@ -109,6 +125,12 @@ function DashboardInner() {
           </Link>
         </div>
         {recentQ.isLoading && <p className="text-sm">Loading…</p>}
+        {recentQ.error && (
+          <p className="text-sm text-red-500">
+            Failed to load recent campaigns.{" "}
+            <button onClick={() => recentQ.refetch()} className="underline">Retry</button>
+          </p>
+        )}
         {recentQ.data && recentQ.data.length === 0 && (
           <div className="rounded-xl border border-dashed border-neutral-300 dark:border-neutral-700 px-6 py-10 text-center text-sm text-neutral-500">
             No campaigns yet.{" "}

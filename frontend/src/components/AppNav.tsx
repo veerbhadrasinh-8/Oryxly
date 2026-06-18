@@ -10,7 +10,6 @@ const LINKS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/smtp", label: "SMTP" },
   { href: "/contacts", label: "Contacts" },
-  { href: "/templates", label: "Templates" },
   { href: "/attachments", label: "Attachments" },
   { href: "/campaigns", label: "Campaigns" },
   { href: "/logs", label: "Logs" },

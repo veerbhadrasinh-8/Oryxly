@@ -1,10 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { use } from "react";
+import { use, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AuthGuard } from "@/features/auth/AuthGuard";
 import { getContactList } from "@/features/contacts/api";
+import type { Contact } from "@/types/contacts";
+
+const BUILTIN_COLS = ["email", "name", "company", "phone"] as const;
+
+/** Collect every key that appears in any contact's custom_data, in insertion order. */
+function collectCustomKeys(contacts: Contact[]): string[] {
+  const seen = new Set<string>();
+  for (const c of contacts) {
+    if (c.custom_data) {
+      for (const k of Object.keys(c.custom_data)) seen.add(k);
+    }
+  }
+  return [...seen];
+}
 
 function Detail({ id }: { id: string }) {
   const { data, isLoading, error } = useQuery({
@@ -12,9 +26,14 @@ function Detail({ id }: { id: string }) {
     queryFn: () => getContactList(id),
   });
 
+  const customKeys = useMemo(
+    () => (data ? collectCustomKeys(data.contacts) : []),
+    [data],
+  );
+
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12 font-sans space-y-6">
-      <header className="flex items-center justify-between">
+    <main className="mx-auto max-w-6xl px-6 py-12 font-sans space-y-6">
+      <header className="flex items-start justify-between">
         <div>
           <Link href="/contacts" className="text-sm text-neutral-500 hover:underline">
             ← Contacts
@@ -34,36 +53,50 @@ function Detail({ id }: { id: string }) {
       {error && <p className="text-sm text-red-500">Failed to load list</p>}
 
       {data && (
-        <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800">
+          <table className="w-full text-sm whitespace-nowrap">
             <thead className="bg-neutral-50 dark:bg-neutral-900/50 text-left text-xs uppercase text-neutral-500">
               <tr>
                 <th className="px-4 py-2.5">Email</th>
                 <th className="px-4 py-2.5">Name</th>
                 <th className="px-4 py-2.5">Company</th>
                 <th className="px-4 py-2.5">Phone</th>
-                <th className="px-4 py-2.5">Custom</th>
+                {customKeys.map((k) => (
+                  <th key={k} className="px-4 py-2.5">{k}</th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-              {data.contacts.map((c) => (
-                <tr key={c.id}>
-                  <td className="px-4 py-3 font-mono">{c.email}</td>
-                  <td className="px-4 py-3">{c.name ?? "—"}</td>
-                  <td className="px-4 py-3">{c.company ?? "—"}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{c.phone ?? "—"}</td>
-                  <td className="px-4 py-3 text-xs text-neutral-500 font-mono">
-                    {c.custom_data ? JSON.stringify(c.custom_data) : "—"}
-                  </td>
-                </tr>
-              ))}
               {data.contacts.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-sm text-neutral-500">
+                  <td
+                    colSpan={BUILTIN_COLS.length + customKeys.length}
+                    className="px-4 py-6 text-center text-sm text-neutral-500"
+                  >
                     No valid contacts in this list.
                   </td>
                 </tr>
               )}
+              {data.contacts.map((c) => (
+                <tr key={c.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-900/30">
+                  <td className="px-4 py-3 font-mono text-xs">{c.email}</td>
+                  <td className="px-4 py-3">{c.name ?? <span className="text-neutral-400">—</span>}</td>
+                  <td className="px-4 py-3">{c.company ?? <span className="text-neutral-400">—</span>}</td>
+                  <td className="px-4 py-3 font-mono text-xs">{c.phone ?? <span className="text-neutral-400">—</span>}</td>
+                  {customKeys.map((k) => {
+                    const val = c.custom_data?.[k];
+                    return (
+                      <td key={k} className="px-4 py-3 text-xs max-w-xs">
+                        {val ? (
+                          <span className="block truncate" title={val}>{val}</span>
+                        ) : (
+                          <span className="text-neutral-400">—</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
