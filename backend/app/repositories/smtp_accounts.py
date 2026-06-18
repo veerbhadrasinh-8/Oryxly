@@ -43,6 +43,7 @@ def create(
         smtp_port=smtp_port,
         smtp_username=smtp_username,
         encrypted_password=encrypted_password,
+        is_locked=True,
     )
     db.add(account)
     db.commit()

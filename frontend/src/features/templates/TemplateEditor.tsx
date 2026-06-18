@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
@@ -55,6 +55,29 @@ export function TemplateEditor({ mode }: { mode: Mode }) {
 
   const previewSubject = useMemo(() => renderLocal(subject, sampleData), [subject, sampleData]);
   const previewBody = useMemo(() => renderLocal(body, sampleData), [body, sampleData]);
+
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const autoResizeIframe = useCallback(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (doc) {
+        iframe.style.height = `${doc.documentElement.scrollHeight}px`;
+      }
+    } catch {
+      // cross-origin guard — no-op
+    }
+  }, []);
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    iframe.style.height = "200px";
+    const onLoad = () => autoResizeIframe();
+    iframe.addEventListener("load", onLoad);
+    return () => iframe.removeEventListener("load", onLoad);
+  }, [previewBody, autoResizeIframe]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -221,9 +244,14 @@ export function TemplateEditor({ mode }: { mode: Mode }) {
             <div className="text-xs text-neutral-500">Subject</div>
             <div className="font-medium">{previewSubject || <em className="text-neutral-400">empty</em>}</div>
           </div>
-          <div
-            className="prose prose-sm dark:prose-invert max-w-none px-5 py-4 text-sm [&_p]:my-2"
-            dangerouslySetInnerHTML={{ __html: previewBody }}
+          <iframe
+            ref={iframeRef}
+            srcDoc={previewBody}
+            title="Email preview"
+            sandbox="allow-same-origin"
+            onLoad={autoResizeIframe}
+            className="w-full min-h-[200px] border-0 block"
+            style={{ height: 200 }}
           />
         </section>
       </aside>

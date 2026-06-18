@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
@@ -10,6 +10,11 @@ import { useAuth } from "@/stores/auth";
 export default function RegisterPage() {
   const router = useRouter();
   const setSession = useAuth((s) => s.setSession);
+  const token = useAuth((s) => s.accessToken);
+
+  useEffect(() => {
+    if (token) router.replace("/dashboard");
+  }, [token, router]);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

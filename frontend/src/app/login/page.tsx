@@ -10,6 +10,7 @@ import { useAuth } from "@/stores/auth";
 export default function LoginPage() {
   const router = useRouter();
   const setSession = useAuth((s) => s.setSession);
+  const token = useAuth((s) => s.accessToken);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -17,10 +18,14 @@ export default function LoginPage() {
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
+    if (token) {
+      router.replace("/dashboard");
+      return;
+    }
     if (new URLSearchParams(window.location.search).get("registered") === "1") {
       setNotice("Account created. Please sign in.");
     }
-  }, []);
+  }, [token, router]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();

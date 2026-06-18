@@ -20,6 +20,7 @@ export function SmtpForm({ onCreated }: { onCreated?: () => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
 
   const mutation = useMutation({
     mutationFn: addSmtp,
@@ -45,6 +46,7 @@ export function SmtpForm({ onCreated }: { onCreated?: () => void }) {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!confirmed) return;
     setError(null);
     mutation.mutate({
       email,
@@ -134,11 +136,33 @@ export function SmtpForm({ onCreated }: { onCreated?: () => void }) {
         </Field>
       </div>
 
+      <div className="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/20 p-4 space-y-2">
+        <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+          ⚠️ SMTP accounts cannot be deleted
+        </p>
+        <p className="text-xs text-amber-700 dark:text-amber-400">
+          Once saved, this account is permanently locked to your profile. You will not be able to
+          remove it under any circumstances.
+        </p>
+        <label className="flex items-start gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            required
+            checked={confirmed}
+            onChange={(e) => setConfirmed(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-amber-400 accent-amber-600"
+          />
+          <span className="text-xs text-amber-800 dark:text-amber-300">
+            I understand this SMTP account cannot be deleted once added
+          </span>
+        </label>
+      </div>
+
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       <button
         type="submit"
-        disabled={mutation.isPending}
+        disabled={mutation.isPending || !confirmed}
         className="rounded-md bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 px-4 py-2 text-sm font-medium disabled:opacity-50"
       >
         {mutation.isPending ? "Verifying…" : "Verify & save"}
