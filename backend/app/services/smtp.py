@@ -59,11 +59,11 @@ def send_test_email(creds: SmtpCreds, *, to_email: str | None = None) -> None:
     """Verify creds AND deliver a tiny test message to `to_email` (defaults to sender)."""
     recipient = to_email or creds.from_email
     msg = EmailMessage()
-    msg["Subject"] = "MailFlow SMTP test"
+    msg["Subject"] = "ORYXLY SMTP test"
     msg["From"] = creds.from_email
     msg["To"] = recipient
     msg.set_content(
-        "This is a test email from MailFlow confirming your SMTP credentials work.\n\n"
+        "This is a test email from ORYXLY confirming your SMTP credentials work.\n\n"
         "If you're reading this, the connection succeeded."
     )
 

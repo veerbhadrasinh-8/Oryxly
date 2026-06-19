@@ -16,7 +16,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen items-center justify-center text-sm text-neutral-500 font-sans">
-      MailFlow
+      ORYXLY
     </main>
   );
 }

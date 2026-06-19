@@ -55,7 +55,7 @@ export default function LoginPage() {
       >
         <header className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
-          <p className="text-sm text-neutral-500">Welcome back to MailFlow.</p>
+          <p className="text-sm text-neutral-500">Welcome back to ORYXLY.</p>
         </header>
 
         {notice && (

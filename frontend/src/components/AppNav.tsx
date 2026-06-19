@@ -52,9 +52,11 @@ export function AppNav() {
       <div className="mx-auto max-w-6xl px-6 h-14 flex items-center gap-6">
         <Link
           href="/dashboard"
-          className="font-semibold tracking-tight text-base hover:opacity-80"
+          className="flex items-center gap-2 hover:opacity-80 shrink-0"
         >
-          MailFlow
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="ORYXLY" className="h-9 w-9 object-contain" />
+          <span className="font-semibold tracking-tight text-lg">ORYXLY</span>
         </Link>
 
         <nav className="flex items-center gap-1 ml-2 flex-1 overflow-x-auto">

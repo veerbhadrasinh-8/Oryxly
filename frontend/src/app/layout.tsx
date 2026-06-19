@@ -15,8 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MailFlow",
+  title: "ORYXLY",
   description: "Email campaigns for Indian SMBs — by Oryxus",
+  icons: { icon: "/logo.png" },
 };
 
 export default function RootLayout({
@@ -30,6 +31,19 @@ export default function RootLayout({
         <Providers>
           <AppNav />
           {children}
+          <footer className="border-t border-neutral-200 dark:border-neutral-800 py-4 mt-8">
+            <p className="text-center text-xs text-neutral-500">
+              Developed by{" "}
+              <a
+                href="https://oryxus.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-neutral-400 hover:text-neutral-100 transition-colors underline underline-offset-2"
+              >
+                Oryxus
+              </a>
+            </p>
+          </footer>
         </Providers>
       </body>
     </html>

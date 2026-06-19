@@ -11,7 +11,7 @@ const BUILTIN_VARS = ["name", "company", "email"] as const;
 const VAR_PATTERN = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_ ]*)\s*\}\}/g;
 
 const STARTER_HTML =
-  "<p>Hi {{name}},</p>\n<p>I came across {{company}} and thought MailFlow could help your outreach.</p>\n<p>Best,<br>Your name</p>";
+  "<p>Hi {{name}},</p>\n<p>I came across {{company}} and thought ORYXLY could help your outreach.</p>\n<p>Best,<br>Your name</p>";
 
 type Mode =
   | { kind: "create" }

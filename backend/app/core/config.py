@@ -17,7 +17,7 @@ _NON_PROD_ENVS = {"development", "dev", "local", "test", "testing", "ci"}
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    APP_NAME: str = "MailFlow API"
+    APP_NAME: str = "ORYXLY API"
     ENV: str = Field(default="development")
     DEBUG: bool = True
 

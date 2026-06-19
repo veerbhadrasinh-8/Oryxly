@@ -642,7 +642,7 @@ function ReviewStep({
             </div>
             <iframe
               ref={iframeRef}
-              srcDoc={previewQ.data.html_body}
+              srcDoc={`<style>html,body{background:#0a0a0a;color:#e5e5e5;margin:0;padding:8px;font-family:sans-serif}a{color:#a3a3a3}</style>${previewQ.data.html_body}`}
               title="Email preview"
               sandbox="allow-same-origin"
               onLoad={autoResize}
