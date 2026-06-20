@@ -4,7 +4,7 @@ Design:
 - `start_campaign(campaign_id)` runs once per launch. It flips queued→running
   and schedules a `send_recipient` task for each pending recipient with a
   countdown that staggers sends by ≥ MIN_DELAY_SECONDS (business rule: 4s).
-- Each `send_recipient(recipient_id)` is independent — own DB session, own
+- Each `send_recipient(recipient_id)` is independent - own DB session, own
   retry policy, own SMTP connection. If a recipient errors, it retries up
   to MAX_ATTEMPTS times with exponential backoff, then marks failed.
 - After every send (success or terminal failure) we check whether the
@@ -106,7 +106,7 @@ def start_campaign(campaign_id: str) -> dict:
 @shared_task(
     name="campaigns.send_recipient",
     bind=True,
-    # We do NOT use autoretry_for — that path bypasses our MaxRetriesExceededError
+    # We do NOT use autoretry_for - that path bypasses our MaxRetriesExceededError
     # handler so a recipient that exhausts all retries would sit in PENDING
     # forever. Manual self.retry() lets us catch terminal failure and
     # _mark_failed correctly.
@@ -176,7 +176,7 @@ def send_recipient(self, recipient_id: str) -> dict:
         db.commit()
 
         # Load campaign attachments (if any). Read from storage once per
-        # task — small files, infrequent fetches.
+        # task - small files, infrequent fetches.
         attachments_payload: list[dict] = []
         try:
             storage = get_storage()
@@ -184,28 +184,28 @@ def send_recipient(self, recipient_id: str) -> dict:
                 try:
                     content = storage.get(att.storage_key)
                 except FileNotFoundError:
-                    log.warning("attachment %s storage key missing — skipping", att.id)
+                    log.warning("attachment %s storage key missing - skipping", att.id)
                     continue
                 attachments_payload.append({
                     "filename": att.original_name,
                     "mime": att.mime_type,
                     "content": content,
                 })
-        except Exception as exc:  # noqa: BLE001 — storage failure shouldn't crash send
+        except Exception as exc:  # noqa: BLE001 - storage failure shouldn't crash send
             log.warning("send_recipient %s: failed loading attachments: %s", recipient_id, exc)
 
         # Monthly-cap reservation (per-user). Reserve a slot atomically right
         # before sending so concurrent workers can't overshoot the cap, and so
         # no work between here and the send can leak a reserved slot. If the
         # month is full, reschedule the recipient a day later as a *fresh*
-        # task — we don't use self.retry() because that would consume the SMTP
+        # task - we don't use self.retry() because that would consume the SMTP
         # retry budget (max_retries=2). A full cap is an environmental wait,
         # not a delivery failure.
         monthly_limit = effective_monthly_email_limit(user)
         if not reserve_send_slot(str(user.id), monthly_limit, want=1):
             log.info("send_recipient %s: monthly cap reached, rescheduling +1d", recipient_id)
             send_recipient.apply_async(args=[recipient_id], countdown=24 * 60 * 60)
-            return {"ok": True, "reason": "rescheduled — monthly cap"}
+            return {"ok": True, "reason": "rescheduled - monthly cap"}
 
         try:
             send_message(
@@ -222,7 +222,7 @@ def send_recipient(self, recipient_id: str) -> dict:
                 "send_recipient %s: SMTP error attempt %d/%d: %s",
                 recipient_id, rec.attempt_count, MAX_ATTEMPTS, exc,
             )
-            # Explicit retry-budget check — clearer than catching
+            # Explicit retry-budget check - clearer than catching
             # MaxRetriesExceededError and survives any future change
             # to self.retry()'s exception semantics.
             #
@@ -274,7 +274,7 @@ def _mark_failed(db: Session, rec: CampaignRecipient, c: Campaign, reason: str) 
 def _maybe_finalize(db: Session, campaign_id: UUID) -> None:
     """If no recipients are pending, flip the campaign to completed/failed.
 
-    Counts come from fresh SQL, never the ORM identity map — after raw
+    Counts come from fresh SQL, never the ORM identity map - after raw
     UPDATE statements the cached `c.sent_count` is stale, which previously
     caused 1-recipient campaigns to be marked FAILED even though their
     only send succeeded.

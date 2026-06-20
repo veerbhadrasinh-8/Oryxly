@@ -181,10 +181,10 @@ function LogsInner() {
                         ? new Date(log.last_attempt_at).toLocaleString()
                         : log.sent_at
                           ? new Date(log.sent_at).toLocaleString()
-                          : "—"}
+                          : "-"}
                     </td>
                     <td className="px-4 py-3 text-xs text-red-600 dark:text-red-400 max-w-xs truncate">
-                      {log.error_message ?? "—"}
+                      {log.error_message ?? "-"}
                     </td>
                   </tr>
                 ))}

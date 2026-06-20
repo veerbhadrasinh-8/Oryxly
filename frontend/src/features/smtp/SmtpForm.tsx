@@ -36,7 +36,7 @@ export function SmtpForm({ onCreated }: { onCreated?: () => void }) {
       if (isAxiosError(err)) {
         const detail = err.response?.data?.detail;
         if (typeof detail === "string") return setError(detail);
-        if (err.response?.status === 500) return setError("Server error — check backend logs");
+        if (err.response?.status === 500) return setError("Server error - check backend logs");
         if (!err.response) return setError(`Network error: ${err.message}`);
         return setError(`Request failed (${err.response.status})`);
       }

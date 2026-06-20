@@ -233,7 +233,7 @@ function AttachmentsPanel({ campaignId }: { campaignId: string }) {
       <div>
         <h3 className="text-xs font-medium uppercase text-neutral-500 mb-2">Attached</h3>
         {linkedQ.data && linkedQ.data.length === 0 ? (
-          <p className="text-sm text-neutral-500">None — pick from below.</p>
+          <p className="text-sm text-neutral-500">None - pick from below.</p>
         ) : (
           <ul className="space-y-1.5">
             {linkedQ.data?.map((a) => (
@@ -316,7 +316,7 @@ function Row({
   href?: string;
 }) {
   const content = (
-    <span className={mono ? "font-mono" : ""}>{value ?? "—"}</span>
+    <span className={mono ? "font-mono" : ""}>{value ?? "-"}</span>
   );
   return (
     <div className="space-y-0.5">
@@ -339,10 +339,10 @@ function extractError(err: unknown): string {
     const detail = err.response?.data?.detail;
     if (typeof detail === "string") return detail;
     if (!err.response) {
-      return `Network error (${err.message}). Refresh — the action may already have succeeded.`;
+      return `Network error (${err.message}). Refresh - the action may already have succeeded.`;
     }
     if (err.response.status === 500) {
-      return "Server error 500 — backend logs should have the details.";
+      return "Server error 500 - backend logs should have the details.";
     }
     return `Request failed (HTTP ${err.response.status})`;
   }

@@ -69,7 +69,7 @@ function DashboardInner() {
       <section className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <KpiCard
           label="Total campaigns"
-          value={s?.campaigns.total ?? "—"}
+          value={s?.campaigns.total ?? "-"}
           sub={
             s
               ? `${s.campaigns.completed} completed · ${s.campaigns.running + s.campaigns.queued} active`
@@ -79,20 +79,20 @@ function DashboardInner() {
         />
         <KpiCard
           label="Emails sent"
-          value={s?.emails.sent ?? "—"}
+          value={s?.emails.sent ?? "-"}
           sub={s ? `${s.emails.failed} failed · ${s.emails.pending} pending` : ""}
           accent="emerald"
           href="/logs?status=sent"
         />
         <KpiCard
           label="SMTP active"
-          value={s ? `${s.smtp.active}/${s.smtp.total}` : "—"}
+          value={s ? `${s.smtp.active}/${s.smtp.total}` : "-"}
           sub="verified senders"
           href="/smtp"
         />
         <KpiCard
           label="Monthly quota"
-          value={s ? `${s.monthly.sent_this_month}/${s.monthly.monthly_cap}` : "—"}
+          value={s ? `${s.monthly.sent_this_month}/${s.monthly.monthly_cap}` : "-"}
           sub={s ? `${monthlyPct}% of monthly cap` : ""}
           accent={monthlyPct >= 90 ? "red" : monthlyPct >= 60 ? "amber" : undefined}
         />

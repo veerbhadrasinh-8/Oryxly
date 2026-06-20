@@ -4,13 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
-from app.core.config import get_settings
 from app.core.ratelimit import rate_limit_ip
 from app.services.audit import record as audit
 from app.core.security import (
     create_access_token,
     create_refresh_token,
     decode_token,
+    dummy_verify,
     hash_password,
     verify_password,
 )
@@ -90,7 +90,12 @@ def login(
 ) -> LoginResponse:
     rate_limit_ip(request, scope="login", limit=10, per_seconds=60)
     user = users_repo.get_by_email(db, payload.email.lower())
-    if user is None or not verify_password(payload.password, user.password_hash):
+    # Spend the same bcrypt time whether or not the account exists, so latency
+    # can't be used to enumerate registered emails.
+    password_ok = verify_password(payload.password, user.password_hash) if user else None
+    if user is None:
+        dummy_verify()
+    if user is None or not password_ok:
         audit(db, action="user.login_failed", request=request,
               metadata={"email": payload.email.lower()})
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid credentials")

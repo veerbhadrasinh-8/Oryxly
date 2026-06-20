@@ -109,7 +109,7 @@ async def upload_contacts(
     if suffix not in ALLOWED_EXTS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"unsupported file type — allowed: {', '.join(sorted(ALLOWED_EXTS))}",
+            detail=f"unsupported file type - allowed: {', '.join(sorted(ALLOWED_EXTS))}",
         )
 
     content = await file.read()

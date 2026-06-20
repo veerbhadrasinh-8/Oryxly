@@ -42,7 +42,7 @@ def reserve_send_slot(user_id: str, limit: int, *, want: int = 1) -> bool:
         key = _month_key(user_id)
         new_total = redis_client.incrby(key, want)
         if new_total == want:
-            # First write this month — set expiry.
+            # First write this month - set expiry.
             redis_client.expire(key, _KEY_TTL_SECONDS)
         if new_total > limit:
             redis_client.decrby(key, want)

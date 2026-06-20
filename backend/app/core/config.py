@@ -5,7 +5,7 @@ from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Insecure placeholder values shipped as local-dev defaults. Production must
-# override these — the guardrail in Settings refuses to boot if it sees them.
+# override these - the guardrail in Settings refuses to boot if it sees them.
 _DEFAULT_SECRET_KEY = "change-me-in-prod"
 _DEFAULT_FERNET_KEY = "change-me-32-url-safe-base64-bytes="
 _MIN_SECRET_KEY_LEN = 32

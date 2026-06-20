@@ -1,6 +1,6 @@
 """Template variable extraction + safe rendering.
 
-Variables use Jinja-style `{{ var }}` syntax but we do NOT use Jinja —
+Variables use Jinja-style `{{ var }}` syntax but we do NOT use Jinja -
 substitution is pure string replacement so users can't smuggle control flow
 into the html_body. Whitespace inside the braces is tolerated.
 """

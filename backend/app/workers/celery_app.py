@@ -1,4 +1,4 @@
-"""Celery application — broker + result backend on Redis."""
+"""Celery application - broker + result backend on Redis."""
 
 from celery import Celery
 

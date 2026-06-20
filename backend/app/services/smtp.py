@@ -20,7 +20,7 @@ class SmtpError(Exception):
 class SmtpRecipientError(SmtpError):
     """Raised when the SERVER accepted our auth but rejected the recipient.
     Distinct from generic SmtpError so the caller can avoid marking the
-    sender account as broken — the creds are fine, the to_email is bad."""
+    sender account as broken - the creds are fine, the to_email is bad."""
 
 
 def _connect(creds: SmtpCreds, timeout: float = 12.0) -> smtplib.SMTP:

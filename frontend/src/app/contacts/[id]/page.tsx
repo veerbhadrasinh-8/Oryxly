@@ -80,9 +80,9 @@ function Detail({ id }: { id: string }) {
               {data.contacts.map((c) => (
                 <tr key={c.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-900/30">
                   <td className="px-4 py-3 font-mono text-xs">{c.email}</td>
-                  <td className="px-4 py-3">{c.name ?? <span className="text-neutral-400">—</span>}</td>
-                  <td className="px-4 py-3">{c.company ?? <span className="text-neutral-400">—</span>}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{c.phone ?? <span className="text-neutral-400">—</span>}</td>
+                  <td className="px-4 py-3">{c.name ?? <span className="text-neutral-400">-</span>}</td>
+                  <td className="px-4 py-3">{c.company ?? <span className="text-neutral-400">-</span>}</td>
+                  <td className="px-4 py-3 font-mono text-xs">{c.phone ?? <span className="text-neutral-400">-</span>}</td>
                   {customKeys.map((k) => {
                     const val = c.custom_data?.[k];
                     return (
@@ -90,7 +90,7 @@ function Detail({ id }: { id: string }) {
                         {val ? (
                           <span className="block truncate" title={val}>{val}</span>
                         ) : (
-                          <span className="text-neutral-400">—</span>
+                          <span className="text-neutral-400">-</span>
                         )}
                       </td>
                     );

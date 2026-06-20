@@ -79,8 +79,14 @@ export function CampaignWizard() {
     enabled: !!listId,
   });
 
-  const activeSmtps = smtpQ.data?.filter((s) => s.status === "active") ?? [];
-  const usableLists = listQ.data?.filter((l) => l.valid_contacts > 0) ?? [];
+  const activeSmtps = useMemo(
+    () => smtpQ.data?.filter((s) => s.status === "active") ?? [],
+    [smtpQ.data],
+  );
+  const usableLists = useMemo(
+    () => listQ.data?.filter((l) => l.valid_contacts > 0) ?? [],
+    [listQ.data],
+  );
 
   // Auto-pick single options
   useEffect(() => {
@@ -221,12 +227,12 @@ export function CampaignWizard() {
         {step === "Name" && (
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">Name your campaign</h2>
-            <p className="text-sm text-neutral-500">Internal only — recipients won&apos;t see this.</p>
+            <p className="text-sm text-neutral-500">Internal only - recipients won&apos;t see this.</p>
             <input
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Dubai clinics — June outreach"
+              placeholder="e.g. Dubai clinics - June outreach"
               className={inputCls}
             />
           </section>
@@ -546,7 +552,7 @@ function ContentStep({
         <div className="rounded-md border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 px-4 py-3">
           <p className="text-sm text-red-700 dark:text-red-400 font-medium">Unknown variables</p>
           <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-            {unknownVars.map((v) => `{{${v}}}`).join(", ")} — not in your selected columns. Fix or remove them.
+            {unknownVars.map((v) => `{{${v}}}`).join(", ")} - not in your selected columns. Fix or remove them.
           </p>
         </div>
       )}
@@ -672,7 +678,7 @@ function Row({ label, value, mono }: { label: string; value?: string; mono?: boo
   return (
     <div className="space-y-0.5">
       <dt className="text-xs uppercase text-neutral-500">{label}</dt>
-      <dd className={mono ? "font-mono" : ""}>{value ?? "—"}</dd>
+      <dd className={mono ? "font-mono" : ""}>{value ?? "-"}</dd>
     </div>
   );
 }

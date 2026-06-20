@@ -24,7 +24,7 @@ router = APIRouter(tags=["attachments"])
 
 MAX_BYTES = 10 * 1024 * 1024  # 10 MB per PRD
 
-# (extension, MIME) — both must match. Defensive against renames.
+# (extension, MIME) - both must match. Defensive against renames.
 ALLOWED: dict[str, set[str]] = {
     ".pdf": {"application/pdf"},
     ".docx": {
@@ -53,7 +53,7 @@ def _enforce_plan(user: User) -> None:
     if user.plan not in ALLOWED_PLANS:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"attachments are a Growth+ feature — '{user.plan.value}' plan can't use them",
+            detail=f"attachments are a Growth+ feature - '{user.plan.value}' plan can't use them",
         )
 
 
@@ -80,7 +80,7 @@ async def upload_attachment(
     if suffix not in ALLOWED:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"unsupported type — allowed: {', '.join(sorted(ALLOWED.keys()))}",
+            detail=f"unsupported type - allowed: {', '.join(sorted(ALLOWED.keys()))}",
         )
 
     content = await file.read()

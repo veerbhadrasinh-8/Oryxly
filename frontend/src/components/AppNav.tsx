@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMe, logoutRequest } from "@/features/auth/api";
 import { useAuth } from "@/stores/auth";
+import { isMarketingPath } from "@/lib/site";
 
 const LINKS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -13,6 +14,7 @@ const LINKS = [
   { href: "/attachments", label: "Attachments" },
   { href: "/campaigns", label: "Campaigns" },
   { href: "/logs", label: "Logs" },
+  { href: "/guide", label: "Guide" },
 ] as const;
 
 export function AppNav() {
@@ -28,8 +30,9 @@ export function AppNav() {
     staleTime: 60_000,
   });
 
-  // Don't render nav on unauthenticated pages
-  if (!token || pathname === "/login" || pathname === "/register" || pathname === "/") {
+  // Don't render the app nav on public marketing or auth pages - those provide
+  // their own chrome (or none).
+  if (!token || pathname === "/login" || pathname === "/register" || isMarketingPath(pathname)) {
     return null;
   }
 

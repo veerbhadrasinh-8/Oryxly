@@ -1,7 +1,7 @@
 """Pluggable object storage.
 
 LocalStorage writes to the host filesystem under a per-user prefix and is the
-default for dev — no external services required, the worker reads the file
+default for dev - no external services required, the worker reads the file
 straight from disk.
 
 R2Storage (Cloudflare R2 via S3-compatible boto3) is selected when
@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import BinaryIO, Protocol
+from typing import Protocol
 from uuid import UUID, uuid4
 
 from app.core.config import get_settings
@@ -32,7 +32,7 @@ class Storage(Protocol):
         """Fetch content by key. Raises FileNotFoundError if missing."""
 
     def delete(self, key: str) -> None:
-        """Remove the underlying object. Idempotent — missing is OK."""
+        """Remove the underlying object. Idempotent - missing is OK."""
 
 
 # ---------- local FS implementation ----------------------------------------

@@ -21,7 +21,7 @@ def _parse_status(raw: str | None) -> RecipientStatus | None:
     except ValueError:
         raise HTTPException(
             status_code=http_status.HTTP_400_BAD_REQUEST,
-            detail=f"invalid status '{raw}' — allowed: {', '.join(s.value for s in RecipientStatus)}",
+            detail=f"invalid status '{raw}' - allowed: {', '.join(s.value for s in RecipientStatus)}",
         )
 
 

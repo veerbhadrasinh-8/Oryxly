@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy import desc, func, select, text
@@ -58,7 +57,7 @@ def create_list_with_contacts(
     invalid: int,
 ) -> ContactList:
     """Atomic: list + contacts + counts in one transaction. If any row fails to
-    INSERT, the whole upload is rolled back — no orphan empty lists."""
+    INSERT, the whole upload is rolled back - no orphan empty lists."""
     cl = ContactList(
         user_id=user_id,
         name=name,

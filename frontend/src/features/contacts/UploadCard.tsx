@@ -142,7 +142,7 @@ export function UploadCard() {
                 {result.invalid_preview.map((r) => (
                   <li key={r.row_number}>
                     row {r.row_number}: <span className="text-red-500">{r.reason}</span>{" "}
-                    — {JSON.stringify(r.raw)}
+                    - {JSON.stringify(r.raw)}
                   </li>
                 ))}
               </ul>

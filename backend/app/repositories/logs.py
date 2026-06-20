@@ -1,9 +1,9 @@
-"""Logs query — joins campaign_recipients with campaigns + contacts, scoped to
+"""Logs query - joins campaign_recipients with campaigns + contacts, scoped to
 the requesting user. Filterable by status, campaign, and recipient email."""
 
 from uuid import UUID
 
-from sqlalchemy import and_, desc, func, or_, select
+from sqlalchemy import desc, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.models.campaign import Campaign, CampaignRecipient, RecipientStatus

@@ -49,7 +49,7 @@ def _check(key: str, limit: int, per_seconds: int) -> tuple[bool, int]:
     count, ttl = pipe.execute()
     count = int(count)
     if count == 1:
-        # Fresh window — set TTL
+        # Fresh window - set TTL
         redis_client.expire(key, per_seconds)
         ttl = per_seconds
     if count > limit:
@@ -72,7 +72,7 @@ def rate_limit_ip(
     if not allowed:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"too many requests — retry in {retry_after}s",
+            detail=f"too many requests - retry in {retry_after}s",
             headers={"Retry-After": str(retry_after)},
         )
 
@@ -89,6 +89,6 @@ def rate_limit_user(
     if not allowed:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"too many requests — retry in {retry_after}s",
+            detail=f"too many requests - retry in {retry_after}s",
             headers={"Retry-After": str(retry_after)},
         )

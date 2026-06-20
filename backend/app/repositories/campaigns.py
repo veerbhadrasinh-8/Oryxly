@@ -128,7 +128,7 @@ def set_status(
 def transition_to_queued_if_draft(db: Session, campaign_id: UUID) -> bool:
     """Atomic draft→queued transition. Avoids the race where the API tries
     to flip DRAFT→QUEUED *after* a fast worker has already moved it to
-    RUNNING — without this, a stale ORM commit would silently regress
+    RUNNING - without this, a stale ORM commit would silently regress
     status from RUNNING back to QUEUED.
 
     Returns True if a row was updated (i.e. we were the one to flip it)."""
@@ -150,7 +150,7 @@ def cancel_remaining_recipients(db: Session, campaign_id: UUID) -> int:
     queued recipients don't sit in PENDING forever.
 
     Counters (sent_count/failed_count) are then *recomputed* from the actual
-    recipient statuses rather than incremented by rowcount — this avoids
+    recipient statuses rather than incremented by rowcount - this avoids
     double-counting when an in-flight send finishes between our UPDATE
     matching and committing.
     """
@@ -206,7 +206,7 @@ def reconcile_counters(db: Session, campaign_id: UUID) -> tuple[int, int]:
     sent_count+1, leaving failed double-counted). This call always brings
     the campaign back to a state consistent with its recipients.
 
-    Returns (sent, failed) — the true values, which the caller can also
+    Returns (sent, failed) - the true values, which the caller can also
     inspect to render in the response."""
     from sqlalchemy import update as sqla_update
 

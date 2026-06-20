@@ -12,7 +12,7 @@ import openpyxl
 import xlrd
 from email_validator import EmailNotValidError, validate_email
 
-# Header aliases — we look these up case-insensitively, trimmed.
+# Header aliases - we look these up case-insensitively, trimmed.
 EMAIL_KEYS = {
     "email",
     "e-mail",
@@ -149,7 +149,7 @@ def _decode_csv_bytes(content: bytes) -> str:
             return content.decode(enc)
         except UnicodeDecodeError:
             continue
-    raise ParseError("could not decode CSV — please save as UTF-8")
+    raise ParseError("could not decode CSV - please save as UTF-8")
 
 
 def _read_csv(content: bytes) -> list[dict[str, str]]:
@@ -178,7 +178,7 @@ def _read_xlsx(content: bytes) -> list[dict[str, str]]:
     if not all_rows:
         raise ParseError("XLSX has no rows")
 
-    # Find the header row — the row with most cells matching known column names
+    # Find the header row - the row with most cells matching known column names
     candidate_rows = all_rows[:_MAX_HEADER_SCAN]
     str_candidates = [[str(c).strip() if c is not None else "" for c in row] for row in candidate_rows]
     header_idx = max(range(len(str_candidates)), key=lambda i: _score_row_as_header(str_candidates[i]))
@@ -205,7 +205,7 @@ def _read_xls(content: bytes) -> list[dict[str, str]]:
     if sheet.nrows < 1:
         raise ParseError("XLS has no rows")
 
-    # Find the header row — the row with most cells matching known column names
+    # Find the header row - the row with most cells matching known column names
     scan_end = min(_MAX_HEADER_SCAN, sheet.nrows)
     str_rows = [
         [str(sheet.cell_value(r, c)).strip() for c in range(sheet.ncols)]

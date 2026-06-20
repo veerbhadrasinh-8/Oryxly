@@ -35,7 +35,7 @@ export default function RegisterPage() {
       return;
     }
 
-    // Step 2: account exists now. Auto-login as a convenience — if it hiccups,
+    // Step 2: account exists now. Auto-login as a convenience - if it hiccups,
     // don't claim registration failed; send them to the login page instead.
     try {
       const data = await loginRequest(email, password);

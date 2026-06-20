@@ -22,3 +22,7 @@ frontend/.next/
 # editor
 .vscode/
 .idea/
+
+# claude code — plugin cache is binary and not project code
+.claude/skills/
+.claude/plugins/

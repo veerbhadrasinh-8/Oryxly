@@ -24,7 +24,7 @@ app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Sensible defaults for an API-only backend. The frontend has its own
-    CSP via Next.js — these headers protect the API surface from being
+    CSP via Next.js - these headers protect the API surface from being
     embedded, MIME-sniffed, or leaking referrer data."""
 
     async def dispatch(self, request: Request, call_next) -> Response:

@@ -122,7 +122,7 @@ def test_smtp(
         else:
             verify_credentials(creds)
     except SmtpRecipientError as exc:
-        # The sender SMTP works — just the test recipient was bad. Don't
+        # The sender SMTP works - just the test recipient was bad. Don't
         # taint the account's verified status; surface the recipient error
         # so the user can fix the test address.
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))

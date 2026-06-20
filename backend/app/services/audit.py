@@ -1,4 +1,4 @@
-"""Audit log writer — best-effort, never blocks the user's request.
+"""Audit log writer - best-effort, never blocks the user's request.
 
 Failures are swallowed and logged. We never want a bookkeeping problem to
 turn a successful action into a 500.
@@ -42,7 +42,7 @@ def record(
         )
         db.add(entry)
         db.commit()
-    except Exception as exc:  # noqa: BLE001 — never let logging crash a request
+    except Exception as exc:  # noqa: BLE001 - never let logging crash a request
         log.warning("failed to write audit log for action=%s: %s", action, exc)
         try:
             db.rollback()

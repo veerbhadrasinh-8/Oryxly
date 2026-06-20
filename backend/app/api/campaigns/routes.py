@@ -99,7 +99,7 @@ def create_campaign(
     if smtp is None:
         raise HTTPException(status_code=404, detail="SMTP account not found")
     if smtp.status != SmtpStatus.ACTIVE:
-        raise HTTPException(status_code=400, detail="SMTP account is not active — verify it first")
+        raise HTTPException(status_code=400, detail="SMTP account is not active - verify it first")
 
     cl = contacts_repo.get_owned(db, user_id=user.id, list_id=payload.contact_list_id)
     if cl is None:
@@ -200,7 +200,7 @@ def launch_campaign(
 
     smtp = smtp_repo.get_owned(db, user_id=user.id, smtp_id=c.smtp_account_id)
     if smtp is None or smtp.status != SmtpStatus.ACTIVE:
-        raise HTTPException(status_code=400, detail="SMTP account is no longer active — re-verify it")
+        raise HTTPException(status_code=400, detail="SMTP account is no longer active - re-verify it")
 
     from app.workers.tasks import start_campaign
 

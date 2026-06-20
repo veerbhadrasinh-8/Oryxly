@@ -81,7 +81,7 @@ export function TemplateEditor({ mode }: { mode: Mode }) {
         iframe.style.height = `${doc.documentElement.scrollHeight}px`;
       }
     } catch {
-      // cross-origin guard — no-op
+      // cross-origin guard - no-op
     }
   }, []);
 
@@ -189,7 +189,7 @@ export function TemplateEditor({ mode }: { mode: Mode }) {
         <section className="space-y-2">
           <div className="text-xs uppercase text-neutral-500">Detected variables</div>
           {detected.length === 0 ? (
-            <p className="text-xs text-neutral-500">None yet — wrap text in {`{{ }}`}.</p>
+            <p className="text-xs text-neutral-500">None yet - wrap text in {`{{ }}`}.</p>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {detected.map((v) => (
@@ -205,7 +205,7 @@ export function TemplateEditor({ mode }: { mode: Mode }) {
           )}
           {detected.length > 0 && (
             <p className="text-xs text-neutral-500">
-              Variables are filled from contact data at send time. Any column from your uploaded CSV/XLS file works — use the exact column name.
+              Variables are filled from contact data at send time. Any column from your uploaded CSV/XLS file works - use the exact column name.
             </p>
           )}
         </section>

@@ -135,7 +135,7 @@ export function UsersTable({ users }: { users: AdminUser[] }) {
               </td>
               <td className="px-4 py-3">
                 {u.is_admin ? (
-                  <span className="text-neutral-400">—</span>
+                  <span className="text-neutral-400">-</span>
                 ) : (
                   <LimitEditor
                     user={u}
@@ -146,7 +146,7 @@ export function UsersTable({ users }: { users: AdminUser[] }) {
               </td>
               <td className="px-4 py-3">
                 {u.is_admin ? (
-                  <span className="text-neutral-400">—</span>
+                  <span className="text-neutral-400">-</span>
                 ) : (
                   <button
                     onClick={() => mutation.mutate({ userId: u.id, payload: { is_active: !u.is_active } })}

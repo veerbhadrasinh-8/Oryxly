@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -10,7 +10,7 @@ from app.database.session import Base
 
 class AuditLog(Base):
     """Append-only record of security-relevant actions. No FK with CASCADE on
-    user_id deliberately — even if a user account is removed, we want their
+    user_id deliberately - even if a user account is removed, we want their
     audit trail intact for forensic purposes."""
 
     __tablename__ = "audit_logs"

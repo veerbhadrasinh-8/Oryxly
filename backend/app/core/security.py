@@ -14,6 +14,20 @@ TokenType = Literal["access", "refresh"]
 # bcrypt has a 72-byte password ceiling; truncate to be safe.
 _BCRYPT_MAX = 72
 
+# Precomputed hash of a random value. Used to spend a bcrypt comparison even when
+# the account does not exist, so login response time does not reveal which emails
+# are registered (user-enumeration timing oracle).
+_DUMMY_HASH = bcrypt.hashpw(b"dummy-password-for-constant-time", bcrypt.gensalt()).decode("utf-8")
+
+
+def dummy_verify() -> None:
+    """Run a throwaway bcrypt comparison to equalize login timing.
+
+    Call this on the missing-user path so an unauthenticated attacker cannot
+    distinguish "no such account" from "wrong password" by measuring latency.
+    """
+    bcrypt.checkpw(b"dummy-password-for-constant-time", _DUMMY_HASH.encode("utf-8"))
+
 
 def hash_password(password: str) -> str:
     pw = password.encode("utf-8")[:_BCRYPT_MAX]
