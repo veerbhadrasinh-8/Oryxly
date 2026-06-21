@@ -159,18 +159,18 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="mx-auto max-w-6xl px-6 py-16">
+      <section id="features" className="mx-auto max-w-6xl px-5 sm:px-6 py-16">
         <h2 className="text-3xl font-bold tracking-tight text-center">
           Everything you need to run real campaigns
         </h2>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-12 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f) => (
             <div
               key={f.title}
               className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-6"
             >
-              <h3 className="font-semibold">{f.title}</h3>
-              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">{f.body}</p>
+              <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">{f.title}</h3>
+              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">{f.body}</p>
             </div>
           ))}
         </div>
