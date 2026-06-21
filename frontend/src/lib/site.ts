@@ -70,6 +70,7 @@ export function isMarketingPath(pathname: string): boolean {
 export const MARKETING_NAV = [
   { href: "/features", label: "Features" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/compare", label: "Compare" },
   { href: "/guide", label: "Guide" },
   { href: "/faq", label: "FAQ" },
   { href: "/about", label: "About" },

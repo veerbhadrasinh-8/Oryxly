@@ -6,6 +6,7 @@ const ROUTE_CONFIG: Array<{ path: string; priority: number; changeFrequency: "al
   { path: "/features",                 priority: 0.9, changeFrequency: "weekly" },
   { path: "/pricing",                  priority: 0.9, changeFrequency: "monthly" },
   { path: "/faq",                      priority: 0.9, changeFrequency: "weekly" },
+  { path: "/compare",                  priority: 0.8, changeFrequency: "monthly" },
   { path: "/compare/zoho-campaigns",   priority: 0.9, changeFrequency: "monthly" },
   { path: "/compare/mailchimp",        priority: 0.9, changeFrequency: "monthly" },
   { path: "/guide",                    priority: 0.8, changeFrequency: "monthly" },
