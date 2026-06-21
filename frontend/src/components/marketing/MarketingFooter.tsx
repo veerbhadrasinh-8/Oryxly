@@ -33,8 +33,10 @@ export function MarketingFooter() {
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-medium">Get started</h3>
+          <h3 className="text-sm font-medium">Compare</h3>
           <ul className="space-y-1.5 text-sm text-neutral-500">
+            <li><Link href="/compare/zoho-campaigns" className="hover:text-neutral-900 dark:hover:text-neutral-100">ORYXLY vs Zoho Campaigns</Link></li>
+            <li><Link href="/compare/mailchimp" className="hover:text-neutral-900 dark:hover:text-neutral-100">ORYXLY vs Mailchimp</Link></li>
             <li><Link href="/register" className="hover:text-neutral-900 dark:hover:text-neutral-100">Sign up</Link></li>
             <li><Link href="/login" className="hover:text-neutral-900 dark:hover:text-neutral-100">Sign in</Link></li>
           </ul>

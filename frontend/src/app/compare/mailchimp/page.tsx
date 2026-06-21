@@ -5,9 +5,9 @@ import { JsonLd } from "@/components/marketing/JsonLd";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "ORYXLY vs Mailchimp – Affordable Mailchimp Alternative for India",
+  title: "ORYXLY vs Mailchimp - Affordable Mailchimp Alternative for India",
   description:
-    "ORYXLY vs Mailchimp: flat INR pricing, your own SMTP, no per-contact fees. The best affordable Mailchimp alternative for Indian SMBs, exporters, and agencies.",
+    "ORYXLY vs Mailchimp: flat INR pricing, your own SMTP, no per-contact fees. The most affordable Mailchimp alternative for Indian SMBs, exporters, and agencies.",
   alternates: { canonical: "/compare/mailchimp" },
   openGraph: {
     title: `ORYXLY vs Mailchimp | ${SITE_NAME}`,
@@ -16,39 +16,93 @@ export const metadata: Metadata = {
 };
 
 const COMPARISON = [
-  { feature: "Sending infrastructure",  oryxly: "Your own SMTP",              mailchimp: "Mailchimp shared servers" },
-  { feature: "IP reputation",           oryxly: "Your domain, your control",   mailchimp: "Shared IP pool" },
-  { feature: "Pricing currency",        oryxly: "INR (Indian Rupees)",         mailchimp: "USD only" },
-  { feature: "Free plan",               oryxly: "No (paid from ₹1,499/month)", mailchimp: "Yes (500 contacts, limited)" },
-  { feature: "Per-contact fees",        oryxly: "None",                        mailchimp: "Yes — price rises with list size" },
-  { feature: "1,000 contacts cost",     oryxly: "₹1,499/month flat",           mailchimp: "~$13/month (~₹1,100) + usage" },
-  { feature: "10,000 contacts cost",    oryxly: "₹3,499/month flat",           mailchimp: "~$100/month (~₹8,300)" },
-  { feature: "SMTP provider choice",    oryxly: "Gmail, Outlook, SendGrid…",   mailchimp: "Mailchimp infrastructure only" },
-  { feature: "Variable personalization",oryxly: "Any CSV/XLSX column",         mailchimp: "Merge tags (limited in free)" },
-  { feature: "Delivery logs",           oryxly: "Audit-grade per message",     mailchimp: "Campaign-level reports only" },
-  { feature: "India-focused support",   oryxly: "Yes",                         mailchimp: "No" },
+  {
+    feature: "Sending infrastructure",
+    oryxly: "Your own SMTP (Gmail, Outlook, Zoho Mail, SendGrid)",
+    mailchimp: "Mailchimp shared servers and IP pools",
+  },
+  {
+    feature: "IP reputation control",
+    oryxly: "100% yours - your domain, your sending history",
+    mailchimp: "Shared with all Mailchimp users on the same pool",
+  },
+  {
+    feature: "Pricing currency",
+    oryxly: "INR - no forex conversion or USD surprises",
+    mailchimp: "USD only - price changes with rupee exchange rate",
+  },
+  {
+    feature: "Free plan",
+    oryxly: "No free plan - paid from Rs. 1,499/month",
+    mailchimp: "Yes - up to 500 contacts, 1,000 emails/month (limited)",
+  },
+  {
+    feature: "Per-contact pricing",
+    oryxly: "None - flat fee regardless of list size",
+    mailchimp: "Yes - price rises as your contact count grows",
+  },
+  {
+    feature: "Cost at 10,000 contacts",
+    oryxly: "Rs. 3,499/month (Growth plan, up to 25,000 contacts)",
+    mailchimp: "~$100/month (~Rs. 8,300) on Essentials plan",
+  },
+  {
+    feature: "Cost at 25,000 contacts",
+    oryxly: "Rs. 3,499/month (same Growth plan)",
+    mailchimp: "~$230/month (~Rs. 19,000+)",
+  },
+  {
+    feature: "SMTP provider choice",
+    oryxly: "Any SMTP - Gmail, Outlook, Zoho Mail, SendGrid",
+    mailchimp: "Mailchimp infrastructure only - no SMTP choice",
+  },
+  {
+    feature: "Contact file formats",
+    oryxly: "CSV, XLSX, XLS up to 10 MB",
+    mailchimp: "CSV and TXT only",
+  },
+  {
+    feature: "Variable personalization",
+    oryxly: "Any column from your CSV or XLSX - live preview before send",
+    mailchimp: "Merge tags from contact fields - no live preview on free",
+  },
+  {
+    feature: "Delivery logs",
+    oryxly: "Per-message logs with SMTP error details for every send",
+    mailchimp: "Campaign-level open and click stats, no per-message SMTP logs",
+  },
+  {
+    feature: "Auto-retry on failure",
+    oryxly: "Yes - automatic retry with configurable backoff",
+    mailchimp: "No - failed sends require manual re-send",
+  },
+  {
+    feature: "India-focused",
+    oryxly: "Yes - INR pricing, built for Indian SMBs",
+    mailchimp: "Global product, no India-specific pricing or support",
+  },
 ];
 
 const FAQS = [
   {
     q: "Is ORYXLY a good Mailchimp alternative for India?",
-    a: "Yes. ORYXLY is built specifically for Indian businesses — priced in INR, designed for bring-your-own-SMTP sending, and with no per-contact fees. Mailchimp charges in USD and scales cost with list size, making it expensive for Indian SMBs with large contact lists.",
+    a: "Yes. ORYXLY is built for Indian businesses - priced in INR with no per-contact fees. At 10,000 contacts, Mailchimp costs ~Rs. 8,300/month in USD. ORYXLY Growth plan covers up to 25,000 contacts for Rs. 3,499/month flat. ORYXLY also sends through your own SMTP so your deliverability is not tied to Mailchimp shared servers.",
   },
   {
     q: "How does ORYXLY pricing compare to Mailchimp?",
-    a: "ORYXLY charges a flat monthly fee in INR regardless of contact list size — ₹1,499/month for Starter, ₹3,499/month for Growth. Mailchimp charges per contact: at 10,000 contacts you pay ~$100/month (~₹8,300), which is more than double ORYXLY's Growth plan. As your list grows, ORYXLY becomes significantly cheaper.",
+    a: "ORYXLY charges a flat monthly fee in INR regardless of contact list size. Mailchimp charges per contact in USD: at 10,000 contacts you pay ~$100/month (~Rs. 8,300), at 25,000 contacts ~$230/month (~Rs. 19,000+). ORYXLY Growth plan covers 25,000 contacts for Rs. 3,499/month - about 5x cheaper at that scale.",
   },
   {
-    q: "Does ORYXLY work without Mailchimp's shared IPs?",
-    a: "Yes — that is the core difference. ORYXLY sends through your own SMTP (Gmail, Outlook, Zoho Mail, or SendGrid). Your emails never touch Mailchimp's or anyone else's shared infrastructure. Your sender reputation is entirely your own.",
+    q: "Does ORYXLY use shared IPs like Mailchimp?",
+    a: "No. ORYXLY sends through your own SMTP server - Gmail, Outlook, Zoho Mail, or SendGrid. Your emails never go through shared infrastructure. Mailchimp routes everything through their own shared IP pools, which means another sender's bad behaviour can affect your deliverability.",
   },
   {
     q: "Can I migrate my contacts from Mailchimp to ORYXLY?",
-    a: "Yes. Export your contacts from Mailchimp as a CSV file, then upload that CSV directly to ORYXLY. ORYXLY validates and deduplicates the list automatically. The process takes a few minutes.",
+    a: "Yes. Export your contacts from Mailchimp as a CSV file, then upload that CSV directly to ORYXLY. ORYXLY validates and deduplicates the list automatically. The migration takes a few minutes and requires no technical knowledge.",
   },
   {
-    q: "What does ORYXLY have that Mailchimp doesn't?",
-    a: "ORYXLY lets you send through your own SMTP server, giving you full control over deliverability and sender reputation. It is priced in INR with no per-contact fees. It is also simpler — focused on upload, personalize, and send — without the complexity of Mailchimp's automation builder, CRM, and landing page features that most Indian SMBs don't use.",
+    q: "What does ORYXLY not have compared to Mailchimp?",
+    a: "ORYXLY does not include Mailchimp features like marketing automation workflows, landing page builder, social media ads, CRM, or website builder. ORYXLY is focused on one thing - sending personalized bulk email campaigns through your own SMTP with reliable delivery and full logs. If you need only email campaigns and not a full marketing suite, ORYXLY is simpler and more affordable.",
   },
 ];
 
@@ -87,15 +141,15 @@ export default function VsMailchimpPage() {
           ORYXLY vs Mailchimp
         </h1>
         <p className="mt-4 text-lg text-neutral-600 dark:text-neutral-400">
-          ORYXLY is the affordable Mailchimp alternative for India — flat INR pricing,
-          your own SMTP, no per-contact fees, no shared IPs.
+          The affordable Mailchimp alternative for India. Flat INR pricing,
+          your own SMTP, no per-contact fees, no shared IP reputation risk.
         </p>
         <div className="mt-6 flex items-center justify-center gap-3">
           <Link
             href="/register"
             className="rounded-md bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 px-6 py-3 text-sm font-medium hover:opacity-90"
           >
-            Try ORYXLY free
+            Start email campaigns
           </Link>
           <Link
             href="/pricing"
@@ -110,11 +164,11 @@ export default function VsMailchimpPage() {
       <div className="mt-16 max-w-3xl mx-auto rounded-xl border border-neutral-200 dark:border-neutral-800 p-6">
         <h2 className="text-xl font-bold">The short answer</h2>
         <p className="mt-3 text-neutral-600 dark:text-neutral-400">
-          <strong>ORYXLY</strong> is the best Mailchimp alternative for Indian SMBs. Mailchimp charges in
-          USD and scales cost with your contact list — at 10,000 contacts you pay ~₹8,300/month.
-          ORYXLY charges ₹3,499/month flat for up to 25,000 contacts. More importantly, ORYXLY sends
-          through your own SMTP — so your deliverability and sender reputation are not tied to
-          Mailchimp&apos;s shared infrastructure.
+          ORYXLY is the best Mailchimp alternative for Indian SMBs. Mailchimp charges in USD
+          and scales cost with your contact list - at 10,000 contacts you pay ~Rs. 8,300/month.
+          ORYXLY charges Rs. 3,499/month flat for up to 25,000 contacts. More importantly, ORYXLY
+          sends through your own SMTP so your deliverability is not tied to Mailchimp shared
+          infrastructure.
         </p>
       </div>
 
@@ -144,6 +198,7 @@ export default function VsMailchimpPage() {
             </tbody>
           </table>
         </div>
+        <p className="mt-2 text-xs text-neutral-400">Mailchimp pricing approximate based on published rates. Exchange rate used: 1 USD = Rs. 84.</p>
       </div>
 
       {/* Why switch */}
@@ -152,20 +207,20 @@ export default function VsMailchimpPage() {
         <div className="space-y-4">
           {[
             {
-              title: "10x cheaper at scale",
-              body: "Mailchimp at 10,000 contacts costs ~₹8,300/month billed in USD. ORYXLY Growth plan covers 25,000 contacts for ₹3,499/month — flat, in INR, with no surprise charges when your list grows.",
+              title: "5x cheaper at scale",
+              body: "Mailchimp at 10,000 contacts costs ~Rs. 8,300/month billed in USD. ORYXLY Growth plan covers 25,000 contacts for Rs. 3,499/month flat in INR. No forex risk, no per-contact spikes as your list grows.",
             },
             {
               title: "No shared IP reputation risk",
-              body: "Mailchimp sends from their shared IP pool. Other senders on that pool affect your deliverability. ORYXLY routes through your own Gmail, Outlook, or SendGrid — you own the reputation entirely.",
+              body: "Mailchimp sends from their shared IP pool. Other senders on that pool affect your deliverability. ORYXLY routes through your own Gmail, Outlook, or SendGrid - you own the reputation entirely.",
             },
             {
-              title: "Simpler — no features you don't need",
-              body: "Mailchimp bundles CRM, landing pages, social ads, and automation builders. Most Indian SMBs just need to upload a list and send a campaign. ORYXLY does exactly that — nothing more, nothing less.",
+              title: "Simpler - no features you do not need",
+              body: "Mailchimp bundles CRM, landing pages, social ads, and automation builders most Indian SMBs never use. ORYXLY does one thing well - upload a list and send a campaign.",
             },
             {
-              title: "Priced in INR",
-              body: "No USD conversion, no forex surprises. ORYXLY is priced in Indian Rupees for Indian businesses.",
+              title: "INR pricing with no currency risk",
+              body: "Mailchimp bills in USD. When the rupee weakens, your Mailchimp bill goes up. ORYXLY is priced in INR - what you see is what you pay, every month.",
             },
           ].map((item) => (
             <div key={item.title} className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-5">
@@ -196,13 +251,13 @@ export default function VsMailchimpPage() {
       <div className="mt-16 max-w-3xl mx-auto rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 px-8 py-12 text-center">
         <h2 className="text-2xl font-bold tracking-tight">Switch from Mailchimp today</h2>
         <p className="mt-3 text-neutral-600 dark:text-neutral-400">
-          Export your contacts from Mailchimp as CSV, upload to ORYXLY, and send your first campaign in minutes.
+          Export contacts from Mailchimp as CSV, upload to ORYXLY, and send your first campaign in minutes.
         </p>
         <Link
           href="/register"
           className="mt-6 inline-block rounded-md bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 px-6 py-3 text-sm font-medium hover:opacity-90"
         >
-          Get started free
+          Send your first campaign
         </Link>
       </div>
     </MarketingShell>

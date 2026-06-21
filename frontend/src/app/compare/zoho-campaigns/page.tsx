@@ -5,9 +5,9 @@ import { JsonLd } from "@/components/marketing/JsonLd";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "ORYXLY vs Zoho Campaigns – Best Zoho Campaigns Alternative for India",
+  title: "ORYXLY vs Zoho Campaigns - Best Zoho Campaigns Alternative for India",
   description:
-    "ORYXLY vs Zoho Campaigns: ORYXLY sends email through your own SMTP — no shared IPs, flat INR pricing, no per-contact fees. The best Zoho Campaigns alternative for Indian SMBs.",
+    "ORYXLY vs Zoho Campaigns: ORYXLY sends email through your own SMTP, not Zoho shared servers. Flat INR pricing, no per-contact fees. Best Zoho Campaigns alternative for Indian SMBs.",
   alternates: { canonical: "/compare/zoho-campaigns" },
   openGraph: {
     title: `ORYXLY vs Zoho Campaigns | ${SITE_NAME}`,
@@ -16,38 +16,100 @@ export const metadata: Metadata = {
 };
 
 const COMPARISON = [
-  { feature: "Sending infrastructure",  oryxly: "Your own SMTP",           zoho: "Zoho shared servers" },
-  { feature: "IP reputation",           oryxly: "Your domain, your control", zoho: "Shared IP pool" },
-  { feature: "Pricing model",           oryxly: "Flat monthly in INR",      zoho: "Per-contact tiers in USD" },
-  { feature: "Starter price",           oryxly: "₹1,499/month",             zoho: "~₹800+ (500 contacts only)" },
-  { feature: "Per-email fees",          oryxly: "None",                     zoho: "Yes, above plan limits" },
-  { feature: "SMTP provider choice",    oryxly: "Gmail, Outlook, SendGrid…", zoho: "Zoho infrastructure only" },
-  { feature: "Contact deduplication",   oryxly: "Automatic on upload",      zoho: "Manual" },
-  { feature: "Variable personalization",oryxly: "Any CSV/XLSX column",      zoho: "Limited merge tags" },
-  { feature: "Delivery logs",           oryxly: "Audit-grade per message",  zoho: "Basic reporting" },
-  { feature: "Encrypted credentials",   oryxly: "Yes, decrypted at send only", zoho: "N/A (no SMTP)" },
+  {
+    feature: "Sending infrastructure",
+    oryxly: "Your own SMTP (Gmail, Outlook, Zoho Mail, SendGrid)",
+    zoho: "Zoho shared mail servers",
+    winner: "oryxly",
+  },
+  {
+    feature: "IP reputation control",
+    oryxly: "100% yours - your domain, your sending history",
+    zoho: "Shared with all Zoho Campaigns users",
+    winner: "oryxly",
+  },
+  {
+    feature: "Pricing currency",
+    oryxly: "INR - no forex conversion",
+    zoho: "USD (converted at time of payment)",
+    winner: "oryxly",
+  },
+  {
+    feature: "Starter price",
+    oryxly: "Rs. 1,499/month",
+    zoho: "Free up to 2,000 contacts then USD pricing",
+    winner: "neutral",
+  },
+  {
+    feature: "Per-contact fees",
+    oryxly: "None - flat monthly fee only",
+    zoho: "Yes - price scales with contact list size",
+    winner: "oryxly",
+  },
+  {
+    feature: "Emails per month (Starter)",
+    oryxly: "5,000 included",
+    zoho: "6,000 on free plan, limited on paid",
+    winner: "neutral",
+  },
+  {
+    feature: "Contact deduplication",
+    oryxly: "Automatic on every upload",
+    zoho: "Manual - requires user action",
+    winner: "oryxly",
+  },
+  {
+    feature: "Personalization variables",
+    oryxly: "Any column from your CSV or XLSX file",
+    zoho: "Fixed merge tags from contact fields only",
+    winner: "oryxly",
+  },
+  {
+    feature: "SMTP provider choice",
+    oryxly: "Any SMTP - Gmail, Outlook, Zoho Mail, SendGrid",
+    zoho: "Zoho infrastructure only - no SMTP choice",
+    winner: "oryxly",
+  },
+  {
+    feature: "Delivery logs",
+    oryxly: "Per-message logs - sent, failed, pending with SMTP error details",
+    zoho: "Campaign-level open/click reports",
+    winner: "oryxly",
+  },
+  {
+    feature: "Credential security",
+    oryxly: "SMTP passwords encrypted at rest, never exposed via API",
+    zoho: "No SMTP credentials needed (uses Zoho servers)",
+    winner: "neutral",
+  },
+  {
+    feature: "India-focused support",
+    oryxly: "Yes - built for Indian SMBs",
+    zoho: "Global product, India is one of many markets",
+    winner: "oryxly",
+  },
 ];
 
 const FAQS = [
   {
     q: "Is ORYXLY a good alternative to Zoho Campaigns?",
-    a: "Yes. ORYXLY is purpose-built for businesses that want to send email campaigns through their own SMTP server — Gmail, Outlook, Zoho Mail, or SendGrid — rather than a shared platform like Zoho Campaigns. This gives you full control over deliverability, sender reputation, and infrastructure.",
+    a: "Yes. ORYXLY is built for businesses that want to send email campaigns through their own SMTP server - Gmail, Outlook, Zoho Mail, or SendGrid - rather than a shared platform like Zoho Campaigns. You get full control over deliverability, sender reputation, and infrastructure. Pricing is flat monthly in INR with no per-contact fees.",
   },
   {
     q: "How is ORYXLY pricing different from Zoho Campaigns?",
-    a: "ORYXLY charges a flat monthly fee in INR (starting at ₹1,499/month) regardless of how many emails you send — up to your plan limit. Zoho Campaigns charges by contact count and adds fees when you exceed plan limits. For high-volume senders, ORYXLY is significantly more affordable.",
+    a: "ORYXLY charges a flat monthly fee in INR (starting at Rs. 1,499/month) regardless of how many contacts you have - up to your plan limit. Zoho Campaigns scales cost by contact count and bills in USD. For businesses with growing lists, ORYXLY stays predictable while Zoho costs keep climbing.",
   },
   {
     q: "Can I use Zoho Mail SMTP with ORYXLY?",
-    a: "Yes. You can connect your Zoho Mail account to ORYXLY as an SMTP source. Use smtp.zoho.in (India) or smtp.zoho.com (global) on port 587 with STARTTLS and an application-specific password. This lets you send ORYXLY campaigns through your own Zoho Mail domain.",
+    a: "Yes. Connect your Zoho Mail account to ORYXLY as an SMTP source. Use smtp.zoho.in (India) or smtp.zoho.com (global) on port 587 with STARTTLS and an application-specific password. Your campaigns send from your own Zoho Mail domain - not Zoho Campaigns shared servers.",
   },
   {
     q: "Why send through your own SMTP instead of Zoho Campaigns?",
-    a: "Zoho Campaigns sends from Zoho's shared IP pool. If other senders on that pool are flagged for spam, your deliverability suffers. With ORYXLY, your campaigns send from your own domain and SMTP — so your sender reputation is entirely in your control.",
+    a: "Zoho Campaigns sends from shared IP pools. If other senders on that pool get flagged for spam, your deliverability drops too. With ORYXLY, campaigns go out from your own domain and SMTP - your sender reputation is entirely in your hands and cannot be affected by other users.",
   },
   {
-    q: "Which is better for Indian SMBs — ORYXLY or Zoho Campaigns?",
-    a: "ORYXLY is designed specifically for Indian SMBs, exporters, recruiters, and agencies. It is priced in INR, built around bring-your-own-SMTP, and has no per-email fees. Zoho Campaigns is a broader global product that charges in USD and uses shared infrastructure.",
+    q: "Which is better for Indian SMBs - ORYXLY or Zoho Campaigns?",
+    a: "ORYXLY is designed specifically for Indian SMBs, exporters, recruiters, and agencies. It is priced in INR, requires no USD payments, and is built around bring-your-own-SMTP. Zoho Campaigns is a broader global product with USD pricing and shared infrastructure that does not give you control over your sending domain.",
   },
 ];
 
@@ -86,7 +148,7 @@ export default function VsZohoCampaignsPage() {
           ORYXLY vs Zoho Campaigns
         </h1>
         <p className="mt-4 text-lg text-neutral-600 dark:text-neutral-400">
-          ORYXLY sends your email campaigns through your own SMTP — not Zoho&apos;s shared servers.
+          ORYXLY sends your email campaigns through your own SMTP, not Zoho shared servers.
           Full control over deliverability, flat INR pricing, no per-contact fees.
         </p>
         <div className="mt-6 flex items-center justify-center gap-3">
@@ -94,7 +156,7 @@ export default function VsZohoCampaignsPage() {
             href="/register"
             className="rounded-md bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 px-6 py-3 text-sm font-medium hover:opacity-90"
           >
-            Try ORYXLY free
+            Start email campaigns
           </Link>
           <Link
             href="/pricing"
@@ -105,15 +167,15 @@ export default function VsZohoCampaignsPage() {
         </div>
       </div>
 
-      {/* Quick answer — AEO-optimised direct answer */}
+      {/* Quick answer - AEO optimised */}
       <div className="mt-16 max-w-3xl mx-auto rounded-xl border border-neutral-200 dark:border-neutral-800 p-6">
         <h2 className="text-xl font-bold">The short answer</h2>
         <p className="mt-3 text-neutral-600 dark:text-neutral-400">
-          <strong>ORYXLY</strong> is the best Zoho Campaigns alternative for Indian businesses that want to
-          send email through their own SMTP. Unlike Zoho Campaigns — which routes your email through
-          Zoho&apos;s shared infrastructure — ORYXLY lets you connect Gmail, Outlook, Zoho Mail, or
-          SendGrid as the actual sending engine. You own the sender reputation. Pricing is a flat monthly
-          fee in INR with no per-contact or per-email charges.
+          ORYXLY is the best Zoho Campaigns alternative for Indian businesses that want to send email
+          through their own SMTP. Zoho Campaigns routes your email through Zoho shared infrastructure -
+          ORYXLY lets you connect Gmail, Outlook, Zoho Mail, or SendGrid as the actual sending engine.
+          You own the sender reputation. Pricing is a flat monthly fee in INR with no per-contact or
+          per-email charges.
         </p>
       </div>
 
@@ -147,24 +209,24 @@ export default function VsZohoCampaignsPage() {
 
       {/* Why switch */}
       <div className="mt-16 max-w-3xl mx-auto">
-        <h2 className="text-2xl font-bold tracking-tight mb-6">Why Indian businesses switch from Zoho Campaigns to ORYXLY</h2>
+        <h2 className="text-2xl font-bold tracking-tight mb-6">Why businesses switch from Zoho Campaigns to ORYXLY</h2>
         <div className="space-y-4">
           {[
             {
               title: "Your sender reputation, not Zoho's",
-              body: "Zoho Campaigns sends from shared IPs. One bad sender on that pool can hurt your deliverability. ORYXLY routes every campaign through your own domain and SMTP — your reputation stays yours.",
+              body: "Zoho Campaigns sends from shared IPs. One bad sender on that pool can hurt your deliverability. ORYXLY routes every campaign through your own domain and SMTP - your reputation is entirely yours and cannot be impacted by other users.",
             },
             {
-              title: "Flat INR pricing — no surprises",
-              body: "Zoho Campaigns charges per contact and in USD. ORYXLY charges a flat monthly fee in INR. As your list grows, your cost doesn't spike.",
+              title: "Flat INR pricing with no surprises",
+              body: "Zoho Campaigns charges per contact and bills in USD. ORYXLY charges a flat monthly fee in INR. As your list grows, your cost stays the same - no USD conversion, no per-contact spikes.",
             },
             {
               title: "Works with Zoho Mail SMTP",
-              body: "You don't have to leave Zoho Mail to use ORYXLY. Connect your Zoho Mail account via SMTP and send campaigns directly from your own @zoho.in address.",
+              body: "You do not have to leave Zoho Mail to use ORYXLY. Connect your Zoho Mail account via SMTP and send campaigns directly from your own @zoho.in address through ORYXLY's campaign engine.",
             },
             {
-              title: "Built for India",
-              body: "INR pricing, designed for Indian SMBs, exporters, recruiters, and agencies. Not a global product with India as an afterthought.",
+              title: "Built specifically for India",
+              body: "INR pricing, designed for Indian SMBs, exporters, recruiters, and agencies. Not a global product retrofitted for India.",
             },
           ].map((item) => (
             <div key={item.title} className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-5">
@@ -195,13 +257,13 @@ export default function VsZohoCampaignsPage() {
       <div className="mt-16 max-w-3xl mx-auto rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 px-8 py-12 text-center">
         <h2 className="text-2xl font-bold tracking-tight">Switch from Zoho Campaigns today</h2>
         <p className="mt-3 text-neutral-600 dark:text-neutral-400">
-          Connect your SMTP and send your first campaign in under 15 minutes.
+          Connect your SMTP and send your first email campaign in under 15 minutes.
         </p>
         <Link
           href="/register"
           className="mt-6 inline-block rounded-md bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 px-6 py-3 text-sm font-medium hover:opacity-90"
         >
-          Get started free
+          Send your first campaign
         </Link>
       </div>
     </MarketingShell>

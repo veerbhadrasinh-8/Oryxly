@@ -60,7 +60,10 @@ export const MARKETING_PATHS = [
 
 /** True when `pathname` is a public marketing page (own chrome, no app nav). */
 export function isMarketingPath(pathname: string): boolean {
-  return (MARKETING_PATHS as readonly string[]).includes(pathname);
+  return (
+    (MARKETING_PATHS as readonly string[]).includes(pathname) ||
+    pathname.startsWith("/compare")
+  );
 }
 
 /** Marketing top-nav links (public pages). */
