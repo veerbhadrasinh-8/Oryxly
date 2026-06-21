@@ -38,6 +38,8 @@ Indian SMBs, exporters, B2B outreach teams, recruiters, and agencies who want:
 - https://oryxly.in/pricing — Pricing plans
 - https://oryxly.in/faq — Common questions including SMTP setup and comparisons
 - https://oryxly.in/guide — Step-by-step setup for Gmail, Outlook, Zoho Mail, SendGrid
+- https://oryxly.in/compare/zoho-campaigns — ORYXLY vs Zoho Campaigns
+- https://oryxly.in/compare/mailchimp — ORYXLY vs Mailchimp
 
 ## Contact
 
