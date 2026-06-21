@@ -8,23 +8,39 @@
 
 /** Absolute base URL of the public site, used for canonical/OG/sitemap URLs. */
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://oryxly.com";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://oryxly.in";
 
 export const SITE_NAME = "ORYXLY";
-export const SITE_TAGLINE = "Email campaigns that send through your own SMTP";
+export const SITE_TAGLINE = "Email Marketing & Campaign Tool for India";
 export const SITE_DESCRIPTION =
-  "ORYXLY is an email campaign platform for Indian SMBs, exporters, recruiters, and agencies. Connect your own SMTP, upload contacts, personalize with variables, and send reliable campaigns with built-in throttling, retries, and delivery logs.";
+  "ORYXLY is an email marketing and campaign tool for Indian SMBs, exporters, recruiters, and agencies. Connect your own SMTP, upload contacts, personalize with variables, and send bulk email campaigns with built-in throttling, retries, and delivery logs.";
+
+/** Short description for meta tags — 150–160 chars, keyword-dense. */
+export const SITE_META_DESCRIPTION =
+  "Email marketing software for India. Send bulk email campaigns via your own SMTP — no shared IPs, no per-email fees. Upload contacts, personalize, and track every delivery.";
 
 /** Primary keywords seeded into metadata for organic discovery. */
 export const SITE_KEYWORDS = [
+  "email campaign tool",
+  "email marketing tool India",
+  "email marketing software",
   "email campaign software India",
-  "bulk email through own SMTP",
+  "bulk email tool",
+  "email automation tool",
+  "email outreach software",
   "SMTP email marketing",
+  "bulk email through own SMTP",
+  "email marketing for SMB India",
+  "Zoho Campaigns alternative",
+  "Mailchimp alternative India",
   "cold email tool for exporters",
   "recruiter outreach email tool",
   "agency email sending platform",
   "personalized email campaigns",
-  "email marketing for SMB",
+  "email campaign platform",
+  "affordable email marketing India",
+  "email marketing without shared IP",
+  "send bulk email India",
 ];
 
 export const ORG_NAME = "Oryxus";
@@ -137,5 +153,41 @@ export const FAQS = [
   {
     q: "Who is ORYXLY for?",
     a: "Indian SMBs, exporters, recruiters, and agencies who want reliable, personalized email outreach through their own SMTP - without per-email pricing or shared-IP reputation risk.",
+  },
+  {
+    q: "Is ORYXLY an alternative to Zoho Campaigns?",
+    a: "Yes. Unlike Zoho Campaigns, ORYXLY routes your emails through your own SMTP server — so you control the sending domain, IP reputation, and deliverability. There are no per-email charges; you pay a flat monthly fee for the platform.",
+  },
+  {
+    q: "How is ORYXLY different from Mailchimp?",
+    a: "Mailchimp sends from their shared IP pools and charges per contact or per email sent. ORYXLY lets you send through your own Gmail, Outlook, Zoho Mail, or SendGrid account — which means no shared-IP reputation risk and no per-email fees, making it far more affordable for high-volume senders in India.",
+  },
+  {
+    q: "What is SMTP email marketing?",
+    a: "SMTP email marketing means sending your email campaigns through an SMTP server you own or control — such as Gmail, Outlook, Zoho Mail, or a transactional provider like SendGrid. Because you own the sending infrastructure, your deliverability and sender reputation are entirely in your hands.",
+  },
+  {
+    q: "How many emails can I send per day?",
+    a: "Daily send limits depend on your ORYXLY plan and your SMTP provider's own limits. The Starter plan supports up to 5,000 emails per month, Growth up to 30,000, and Agency up to 150,000. Your SMTP provider (e.g. Gmail at 500/day, SendGrid at 100/day free) may impose additional limits.",
+  },
+  {
+    q: "Can I send bulk email through Gmail with ORYXLY?",
+    a: "Yes. Add your Gmail account as an SMTP connection using a 16-character App Password (generated in your Google Account security settings). ORYXLY will send campaigns through that Gmail account with a minimum 4-second delay between messages to protect your sender reputation.",
+  },
+  {
+    q: "Do I need coding skills to use ORYXLY?",
+    a: "No. ORYXLY is a no-code email campaign tool. You upload a CSV or XLSX contact list, write your subject and body with point-and-click variable insertion, and launch — no technical knowledge required beyond having an SMTP account.",
+  },
+  {
+    q: "Is ORYXLY suitable for cold email outreach?",
+    a: "ORYXLY is well-suited for personalized B2B outreach: exporters reaching buyers, recruiters contacting candidates, and agencies sending on behalf of clients. Campaigns send through your own domain with per-recipient personalization and throttled delivery to protect reputation.",
+  },
+  {
+    q: "What is the pricing for ORYXLY?",
+    a: "ORYXLY offers three monthly plans in INR: Starter at ₹1,499/month (1 SMTP, 5,000 emails), Growth at ₹3,499/month (3 SMTPs, 30,000 emails), and Agency at ₹12,999/month (10 SMTPs, 150,000 emails). All plans include personalization, deduplication, throttled sending, retries, and delivery logs.",
+  },
+  {
+    q: "How do I get started with email marketing using ORYXLY?",
+    a: "Sign up at oryxly.in, add your SMTP credentials (Gmail, Outlook, Zoho Mail, or SendGrid), upload a contact list as CSV or XLSX, write your campaign content with personalization variables, preview against a sample contact, and launch. Most users send their first campaign within 15 minutes.",
   },
 ];

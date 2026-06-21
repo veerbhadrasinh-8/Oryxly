@@ -10,17 +10,20 @@ import {
   ORG_NAME,
   ORG_URL,
   SITE_DESCRIPTION,
+  SITE_META_DESCRIPTION,
   SITE_NAME,
   SITE_URL,
 } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Email campaigns through your own SMTP",
-  description: SITE_DESCRIPTION,
+  title: {
+    absolute: `${SITE_NAME} – Email Campaign Tool & Marketing Software for India`,
+  },
+  description: SITE_META_DESCRIPTION,
   alternates: { canonical: "/" },
   openGraph: {
-    title: `${SITE_NAME} - Email campaigns through your own SMTP`,
-    description: SITE_DESCRIPTION,
+    title: `${SITE_NAME} – Email Campaign Tool & Marketing Software for India`,
+    description: SITE_META_DESCRIPTION,
     url: SITE_URL,
   },
 };
@@ -53,42 +56,79 @@ const FEATURES = [
 ];
 
 export default function HomePage() {
-  const orgLd = {
+  const graphLd = {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    name: ORG_NAME,
-    url: ORG_URL,
-    brand: { "@type": "Brand", name: SITE_NAME },
-  };
-  const appLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: SITE_NAME,
-    applicationCategory: "BusinessApplication",
-    operatingSystem: "Web",
-    description: SITE_DESCRIPTION,
-    url: SITE_URL,
-    offers: {
-      "@type": "Offer",
-      price: "1499",
-      priceCurrency: "INR",
-    },
-  };
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
+        name: ORG_NAME,
+        url: ORG_URL,
+        logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` },
+        brand: { "@type": "Brand", name: SITE_NAME },
+        contactPoint: {
+          "@type": "ContactPoint",
+          email: "oryxusofficial@gmail.com",
+          contactType: "customer support",
+        },
+        sameAs: [ORG_URL],
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": `${SITE_URL}/#software`,
+        name: SITE_NAME,
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        description: SITE_DESCRIPTION,
+        url: SITE_URL,
+        featureList: [
+          "Bring your own SMTP",
+          "Bulk email campaigns",
+          "Contact upload and deduplication",
+          "Email personalization with variables",
+          "Throttled sending with automatic retries",
+          "Delivery logs",
+          "Encrypted SMTP credentials",
+        ],
+        offers: [
+          {
+            "@type": "Offer",
+            name: "Starter",
+            price: "1499",
+            priceCurrency: "INR",
+            description: "1 SMTP connection, 5,000 emails/month, 5 campaigns/month",
+          },
+          {
+            "@type": "Offer",
+            name: "Growth",
+            price: "3499",
+            priceCurrency: "INR",
+            description: "3 SMTP connections, 30,000 emails/month, unlimited campaigns",
+          },
+          {
+            "@type": "Offer",
+            name: "Agency",
+            price: "12999",
+            priceCurrency: "INR",
+            description: "10 SMTP connections, 150,000 emails/month, team access",
+          },
+        ],
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${SITE_URL}/#faq`,
+        mainEntity: FAQS.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      },
+    ],
   };
 
   return (
     <div className="font-sans">
-      <JsonLd data={orgLd} />
-      <JsonLd data={appLd} />
-      <JsonLd data={faqLd} />
+      <JsonLd data={graphLd} />
       <MarketingHeader />
 
       {/* Hero */}
@@ -97,7 +137,7 @@ export default function HomePage() {
           Built for Indian SMBs, exporters, recruiters & agencies
         </span>
         <h1 className="mt-6 text-4xl sm:text-6xl font-bold tracking-tight max-w-4xl mx-auto">
-          Email campaigns that send through your own SMTP
+          The email marketing & campaign tool that sends through your own SMTP
         </h1>
         <p className="mt-6 text-lg text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
           {SITE_DESCRIPTION}

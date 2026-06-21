@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
-import { SITE_NAME } from "@/lib/site";
+import { JsonLd } from "@/components/marketing/JsonLd";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Guide",
+  title: "How to Send Email Campaigns – Setup Guide for Gmail, Outlook & Zoho Mail",
   description:
-    "Step-by-step setup guide for ORYXLY: how to get an app password for Gmail, Outlook, Zoho Mail, and SendGrid, and a complete walkthrough of the product from SMTP setup to campaign launch.",
+    "Step-by-step guide: get an app password for Gmail, Outlook, Zoho Mail, or SendGrid, then upload contacts, personalize, and launch your first bulk email marketing campaign with ORYXLY.",
   alternates: { canonical: "/guide" },
-  openGraph: { title: `Guide - ${SITE_NAME}`, url: "/guide" },
+  openGraph: { title: `Email Campaign Setup Guide | ${SITE_NAME}`, url: `${SITE_URL}/guide` },
 };
 
 /* ─── types ─────────────────────────────────────────────────────── */
@@ -320,8 +321,37 @@ function TocLink({ id, label }: { id: string; label: string }) {
 /* ─── page ───────────────────────────────────────────────────────── */
 
 export default function GuidePage() {
+  const howToLd = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to Send Bulk Email Marketing Campaigns with ORYXLY",
+    description:
+      "Complete step-by-step guide to setting up SMTP and sending personalized bulk email marketing campaigns using your own Gmail, Outlook, Zoho Mail, or SendGrid account.",
+    totalTime: "PT15M",
+    step: PRODUCT_GUIDES.map((s) => ({
+      "@type": "HowToStep",
+      name: s.label,
+      text: s.intro,
+      itemListElement: s.steps.map((step) => ({
+        "@type": "HowToDirection",
+        text: `${step.title}: ${step.body}`,
+      })),
+    })),
+  };
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Guide", item: `${SITE_URL}/guide` },
+    ],
+  };
+
   return (
     <MarketingShell>
+      <JsonLd data={howToLd} />
+      <JsonLd data={breadcrumbLd} />
       <div className="max-w-5xl mx-auto">
         {/* Hero */}
         <div className="text-center mb-12">

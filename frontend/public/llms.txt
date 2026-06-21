@@ -1,0 +1,46 @@
+# ORYXLY
+
+> ORYXLY is an email marketing and campaign tool for Indian SMBs, exporters, recruiters, and agencies. It sends bulk email campaigns through your own SMTP server — not shared IP pools — so you control deliverability and sender reputation.
+
+## What ORYXLY does
+
+- Connects your own SMTP (Gmail, Outlook, Zoho Mail, SendGrid) to send campaigns
+- Accepts contact lists as CSV or XLSX, validates and deduplicates automatically
+- Personalizes emails with variables from any column in your contact list
+- Sends with a minimum 4-second delay between messages + automatic retries
+- Tracks every message as sent, failed, or pending in audit-grade delivery logs
+- Encrypts SMTP credentials at rest; never exposes them via API
+
+## Who it is for
+
+Indian SMBs, exporters, B2B outreach teams, recruiters, and agencies who want:
+- Full control over sending infrastructure
+- No per-email pricing
+- No shared IP reputation risk
+- Affordable flat monthly pricing in INR
+
+## Pricing (INR, billed monthly)
+
+- Starter: ₹1,499/month — 1 SMTP, 5,000 emails/month, 5 campaigns/month
+- Growth: ₹3,499/month — 3 SMTPs, 30,000 emails/month, unlimited campaigns
+- Agency: ₹12,999/month — 10 SMTPs, 150,000 emails/month, team access
+
+## How it compares
+
+- vs Mailchimp: ORYXLY uses your own SMTP (no shared IPs), flat pricing (no per-contact fees), built for India
+- vs Zoho Campaigns: ORYXLY routes through your own infrastructure, not Zoho's servers
+- vs SendGrid standalone: ORYXLY is a full campaign UI on top of SMTP — upload contacts, personalize, schedule, log
+
+## Key pages
+
+- https://oryxly.in — Homepage
+- https://oryxly.in/features — Full feature list
+- https://oryxly.in/pricing — Pricing plans
+- https://oryxly.in/faq — Common questions including SMTP setup and comparisons
+- https://oryxly.in/guide — Step-by-step setup for Gmail, Outlook, Zoho Mail, SendGrid
+
+## Contact
+
+- Website: https://oryxly.in
+- Company: Oryxus (https://oryxus.in)
+- Support: oryxusofficial@gmail.com
