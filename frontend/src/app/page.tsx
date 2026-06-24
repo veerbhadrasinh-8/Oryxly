@@ -206,7 +206,7 @@ export default function HomePage() {
                 <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">&quot;{r.body}&quot;</p>
                 <div>
                   <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{r.name}</p>
-                  <p className="text-xs text-neutral-400">{r.role}, {r.company}</p>
+                  <p className="text-xs text-neutral-400">{r.role}</p>
                 </div>
               </article>
             ))}
