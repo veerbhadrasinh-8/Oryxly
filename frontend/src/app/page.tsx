@@ -9,6 +9,7 @@ import {
   FAQS,
   ORG_NAME,
   ORG_URL,
+  REVIEWS,
   SITE_DESCRIPTION,
   SITE_META_DESCRIPTION,
   SITE_NAME,
@@ -123,6 +124,27 @@ export default function HomePage() {
           acceptedAnswer: { "@type": "Answer", text: f.a },
         })),
       },
+      {
+        "@type": "Product",
+        "@id": `${SITE_URL}/#product`,
+        name: SITE_NAME,
+        description: SITE_DESCRIPTION,
+        url: SITE_URL,
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: "4.8",
+          reviewCount: String(REVIEWS.length),
+          bestRating: "5",
+          worstRating: "1",
+        },
+        review: REVIEWS.map((r) => ({
+          "@type": "Review",
+          author: { "@type": "Person", name: r.name },
+          reviewRating: { "@type": "Rating", ratingValue: String(r.rating), bestRating: "5" },
+          reviewBody: r.body,
+          name: `${r.name} - ${r.company}`,
+        })),
+      },
     ],
   };
 
@@ -155,6 +177,40 @@ export default function HomePage() {
           >
             View pricing
           </Link>
+        </div>
+      </section>
+
+      {/* Reviews marquee */}
+      <section aria-label="Customer reviews" className="py-12 overflow-hidden border-y border-neutral-100 dark:border-neutral-800/60">
+        <p className="text-center text-xs font-semibold uppercase tracking-widest text-neutral-400 mb-8">
+          Trusted by Indian SMBs, exporters, recruiters & agencies
+        </p>
+        <div className="relative">
+          {/* fade edges */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10 bg-gradient-to-r from-white dark:from-[#0a0a0a] to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-24 z-10 bg-gradient-to-l from-white dark:from-[#0a0a0a] to-transparent" />
+          {/* track — duplicated for seamless loop */}
+          <div className="flex gap-4 animate-marquee w-max">
+            {[...REVIEWS, ...REVIEWS].map((r, i) => (
+              <article
+                key={i}
+                className="w-72 shrink-0 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/40 p-5 space-y-3"
+              >
+                <div className="flex items-center gap-0.5" aria-label={`${r.rating} out of 5 stars`}>
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <svg key={s} className={`w-3.5 h-3.5 ${s < r.rating ? "text-amber-400" : "text-neutral-200 dark:text-neutral-700"}`} fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">&quot;{r.body}&quot;</p>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{r.name}</p>
+                  <p className="text-xs text-neutral-400">{r.role}, {r.company}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 

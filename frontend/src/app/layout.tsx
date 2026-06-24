@@ -31,7 +31,14 @@ export const metadata: Metadata = {
   description: SITE_META_DESCRIPTION,
   keywords: [...SITE_KEYWORDS],
   applicationName: SITE_NAME,
-  icons: { icon: "/logo.png" },
+  icons: {
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",

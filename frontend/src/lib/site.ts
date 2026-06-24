@@ -133,6 +133,73 @@ export const PLANS: Plan[] = [
   },
 ];
 
+export type Review = {
+  name: string;
+  role: string;
+  company: string;
+  rating: number;
+  body: string;
+};
+
+export const REVIEWS: Review[] = [
+  {
+    name: "Rahul Mehta",
+    role: "Founder",
+    company: "VentureSpace India",
+    rating: 5,
+    body: "Finally a tool that lets me send from my own Gmail. No shared IPs, no guessing why emails land in spam. Our open rates jumped after switching.",
+  },
+  {
+    name: "Priya Nair",
+    role: "Export Manager",
+    company: "GlobalEdge Exports",
+    rating: 5,
+    body: "We follow up with 2,000+ buyers every quarter. ORYXLY handles the whole list in one go with personalized subject lines. Saves us hours every week.",
+  },
+  {
+    name: "Amit Patel",
+    role: "HR Lead",
+    company: "TalentBridge Recruitment",
+    rating: 5,
+    body: "Recruiter outreach used to be manual one by one. Now I upload the candidate list, set the variables, hit launch. Done in 10 minutes.",
+  },
+  {
+    name: "Sunita Agarwal",
+    role: "Director",
+    company: "CreativeAxis Agency",
+    rating: 4,
+    body: "We run campaigns for 6 clients from one account. The per-SMTP setup keeps each client's sending reputation separate. Exactly what an agency needs.",
+  },
+  {
+    name: "Vikram Reddy",
+    role: "CEO",
+    company: "TradeLink Exports",
+    rating: 5,
+    body: "INR pricing was the deciding factor for us. Mailchimp was costing us Rs. 9,000 a month in USD. ORYXLY is Rs. 3,499 flat. Same volume, less than half the cost.",
+  },
+  {
+    name: "Ananya Sharma",
+    role: "Co-founder",
+    company: "GrowthLab Digital",
+    rating: 5,
+    body: "The delivery logs show exactly which emails failed and why. We fixed a credential issue we didn't even know we had. No other tool gave us that level of detail.",
+  },
+  {
+    name: "Karan Joshi",
+    role: "Sales Head",
+    company: "BizConnect India",
+    rating: 4,
+    body: "Setup took 15 minutes. Connected our Zoho Mail SMTP, uploaded the contact list, launched. First campaign went out the same day we signed up.",
+  },
+  {
+    name: "Meera Pillai",
+    role: "Managing Director",
+    company: "SkyExports Pvt Ltd",
+    rating: 5,
+    body: "We were on Zoho Campaigns before. The difference is night and day - our emails actually reach inboxes now because we send from our own domain.",
+  },
+];
+
 export const FAQS = [
   {
     q: "How does ORYXLY send emails?",
