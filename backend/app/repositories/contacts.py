@@ -115,9 +115,12 @@ def get_custom_columns(db: Session, *, list_id: UUID) -> list[str]:
     """Return sorted unique keys across all custom_data JSONB objects for a list."""
     rows = db.execute(
         text(
-            "SELECT DISTINCT jsonb_object_keys(custom_data) AS k "
-            "FROM contacts "
-            "WHERE list_id = :list_id AND custom_data IS NOT NULL "
+            "SELECT DISTINCT k FROM ("
+            "  SELECT jsonb_object_keys(custom_data) AS k "
+            "  FROM contacts "
+            "  WHERE list_id = :list_id AND custom_data IS NOT NULL"
+            "  AND jsonb_typeof(custom_data) = 'object'"
+            ") sub "
             "ORDER BY k"
         ),
         {"list_id": str(list_id)},

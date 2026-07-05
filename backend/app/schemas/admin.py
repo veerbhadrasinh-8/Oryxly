@@ -11,6 +11,8 @@ class AdminUserRead(BaseModel):
     plan: str
     monthly_email_limit: int | None
     effective_monthly_limit: int
+    smtp_account_limit: int | None
+    effective_smtp_limit: int
     is_active: bool
     is_admin: bool
     created_at: datetime
@@ -19,10 +21,10 @@ class AdminUserRead(BaseModel):
 class AdminUserUpdate(BaseModel):
     plan: str | None = None
     is_active: bool | None = None
-    # null clears the override (revert to plan default); an int sets a custom
-    # monthly cap. Field uses a sentinel so "omitted" differs from "set null".
     monthly_email_limit: int | None = Field(default=None, ge=0)
     clear_monthly_email_limit: bool = False
+    smtp_account_limit: int | None = Field(default=None, ge=1)
+    clear_smtp_account_limit: bool = False
 
 
 class InviteRequest(BaseModel):

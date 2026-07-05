@@ -46,3 +46,9 @@ def set_monthly_email_limit(db: Session, user: User, *, limit: int | None) -> No
     user to their plan's default limit."""
     user.monthly_email_limit = limit
     db.commit()
+
+
+def set_smtp_account_limit(db: Session, user: User, *, limit: int | None) -> None:
+    """Set or clear a user's custom SMTP account limit. ``None`` reverts to plan default."""
+    user.smtp_account_limit = limit
+    db.commit()

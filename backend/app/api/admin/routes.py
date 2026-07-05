@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import require_admin
-from app.core.plans import effective_monthly_email_limit
+from app.core.plans import effective_monthly_email_limit, effective_smtp_limit
 from app.database.session import get_db
 from app.models.invitation import Invitation
 from app.models.user import User, UserPlan
@@ -30,6 +30,8 @@ def _user_read(user: User) -> AdminUserRead:
         plan=user.plan.value,
         monthly_email_limit=user.monthly_email_limit,
         effective_monthly_limit=effective_monthly_email_limit(user),
+        smtp_account_limit=user.smtp_account_limit,
+        effective_smtp_limit=effective_smtp_limit(user),
         is_active=user.is_active,
         is_admin=user.is_admin,
         created_at=user.created_at,
@@ -68,11 +70,14 @@ def update_user(
         users_repo.set_plan(db, user, plan=plan)
     if payload.is_active is not None:
         users_repo.set_active(db, user, is_active=payload.is_active)
-    # Custom monthly cap: clear takes precedence over set.
     if payload.clear_monthly_email_limit:
         users_repo.set_monthly_email_limit(db, user, limit=None)
     elif payload.monthly_email_limit is not None:
         users_repo.set_monthly_email_limit(db, user, limit=payload.monthly_email_limit)
+    if payload.clear_smtp_account_limit:
+        users_repo.set_smtp_account_limit(db, user, limit=None)
+    elif payload.smtp_account_limit is not None:
+        users_repo.set_smtp_account_limit(db, user, limit=payload.smtp_account_limit)
     db.refresh(user)
     return _user_read(user)
 

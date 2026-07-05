@@ -42,6 +42,13 @@ CONTACT_LIMIT: dict[UserPlan, int | None] = {
 }
 
 
+def effective_smtp_limit(user: "User") -> int:
+    """Resolve the user's SMTP account limit. Admin override wins over plan default."""
+    if user.smtp_account_limit is not None:
+        return user.smtp_account_limit
+    return SMTP_LIMIT[user.plan]
+
+
 def effective_monthly_email_limit(user: "User") -> int:
     """Resolve the user's monthly email cap.
 

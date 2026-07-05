@@ -31,6 +31,8 @@ class User(Base):
     # Per-user override of the monthly email cap. NULL → use the plan default
     # from app.core.plans.MONTHLY_EMAIL_LIMIT. Set by admins for custom deals.
     monthly_email_limit: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Per-user override of the SMTP account limit. NULL → use plan default.
+    smtp_account_limit: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

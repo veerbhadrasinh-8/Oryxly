@@ -7,6 +7,8 @@ export type AdminUser = {
   plan: string;
   monthly_email_limit: number | null;
   effective_monthly_limit: number;
+  smtp_account_limit: number | null;
+  effective_smtp_limit: number;
   is_active: boolean;
   is_admin: boolean;
   created_at: string;
@@ -17,6 +19,8 @@ export type UserUpdatePayload = {
   is_active?: boolean;
   monthly_email_limit?: number;
   clear_monthly_email_limit?: boolean;
+  smtp_account_limit?: number;
+  clear_smtp_account_limit?: boolean;
 };
 
 export type Invitation = {
