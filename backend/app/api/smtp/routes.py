@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.services.audit import record as audit
 from app.core.crypto import decrypt, encrypt
-from app.core.plans import SMTP_LIMIT
+from app.core.plans import effective_smtp_limit
 from app.database.session import get_db
 from app.models.smtp_account import SmtpAccount
 from app.models.user import User
@@ -69,7 +69,7 @@ def add_smtp(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> SmtpCreateResponse:
-    cap = SMTP_LIMIT[user.plan]
+    cap = effective_smtp_limit(user)
     if smtp_repo.count_for_user(db, user.id) >= cap:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
