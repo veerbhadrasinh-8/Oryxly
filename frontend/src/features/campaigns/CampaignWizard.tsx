@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { createCampaign, launchCampaign, previewCampaignContent } from "./api";
+import { attachToCampaign } from "@/features/attachments/api";
+import { listAttachments, humanSize } from "@/features/attachments/api";
 import { listSmtp } from "@/features/smtp/api";
 import { getContactListColumns, listContactLists } from "@/features/contacts/api";
 
@@ -25,7 +27,7 @@ function isEmailLike(varName: string): boolean {
 
 // ---- wizard steps ----
 
-const STEPS = ["Name", "Sender", "Audience", "Variables", "Content", "Review"] as const;
+const STEPS = ["Name", "Sender", "Audience", "Variables", "Content", "Attachments", "Review"] as const;
 type Step = (typeof STEPS)[number];
 
 const VAR_RE = /\{\{\s*([a-z][a-z0-9_]*)\s*\}\}/g;
@@ -66,6 +68,9 @@ export function CampaignWizard() {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [focusedField, setFocusedField] = useState<"subject" | "body">("body");
+
+  // Step: Attachments
+  const [selectedAttachmentIds, setSelectedAttachmentIds] = useState<Set<string>>(new Set());
 
   // Step: Review
   const [launchNow, setLaunchNow] = useState(true);
@@ -146,6 +151,7 @@ export function CampaignWizard() {
       case "Audience": return !!listId;
       case "Variables": return selectedVars.size > 0;
       case "Content": return subject.trim().length > 0 && body.trim().length > 0 && !!toVar && unknownVars.length === 0;
+      case "Attachments": return true;
       case "Review": return true;
     }
   }
@@ -173,6 +179,9 @@ export function CampaignWizard() {
         to_variable: toVar,
         selected_columns: selectedVarList,
       });
+      if (selectedAttachmentIds.size > 0) {
+        await attachToCampaign(campaign_id, [...selectedAttachmentIds]);
+      }
       if (launchNow) await launchCampaign(campaign_id);
       return campaign_id;
     },
@@ -306,6 +315,13 @@ export function CampaignWizard() {
           />
         )}
 
+        {step === "Attachments" && (
+          <AttachmentsStep
+            selectedIds={selectedAttachmentIds}
+            setSelectedIds={setSelectedAttachmentIds}
+          />
+        )}
+
         {step === "Review" && (
           <ReviewStep
             name={name}
@@ -355,6 +371,80 @@ export function CampaignWizard() {
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+// ---- Attachments step ----
+
+function AttachmentsStep({
+  selectedIds,
+  setSelectedIds,
+}: {
+  selectedIds: Set<string>;
+  setSelectedIds: (s: Set<string>) => void;
+}) {
+  const attachQ = useQuery({ queryKey: ["attachments"], queryFn: listAttachments });
+
+  function toggle(id: string) {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold">Attach files (optional)</h2>
+        <p className="text-sm text-neutral-500 mt-1">
+          Select files to attach to every email in this campaign. Upload files first via the Attachments tab.
+        </p>
+      </div>
+
+      {attachQ.isLoading && <p className="text-sm">Loading attachments…</p>}
+
+      {attachQ.data && attachQ.data.length === 0 && (
+        <div className="rounded-lg border border-dashed border-neutral-300 dark:border-neutral-700 px-4 py-8 text-center">
+          <p className="text-sm text-neutral-500 mb-2">No files uploaded yet.</p>
+          <a href="/attachments" target="_blank" className="text-sm underline">
+            Upload files →
+          </a>
+        </div>
+      )}
+
+      {attachQ.data && attachQ.data.length > 0 && (
+        <div className="space-y-2">
+          {attachQ.data.map((a) => {
+            const checked = selectedIds.has(a.id);
+            return (
+              <label
+                key={a.id}
+                className={`flex items-center gap-3 rounded-lg border px-4 py-3 cursor-pointer transition ${
+                  checked
+                    ? "border-neutral-900 dark:border-neutral-100 bg-neutral-50 dark:bg-neutral-900/40"
+                    : "border-neutral-300 dark:border-neutral-700"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => toggle(a.id)}
+                  className="h-4 w-4 accent-neutral-900 dark:accent-neutral-100 shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium truncate">{a.original_name}</div>
+                  <div className="text-xs text-neutral-500 mt-0.5">{humanSize(a.file_size)} · {a.mime_type}</div>
+                </div>
+              </label>
+            );
+          })}
+        </div>
+      )}
+
+      {selectedIds.size > 0 && (
+        <p className="text-xs text-neutral-500">{selectedIds.size} file{selectedIds.size > 1 ? "s" : ""} selected — will be attached to every email.</p>
+      )}
     </div>
   );
 }
