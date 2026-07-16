@@ -35,10 +35,6 @@ ALLOWED: dict[str, set[str]] = {
     ".jpeg": {"image/jpeg"},
 }
 
-# Attachments are a Growth+ feature per the PRD ("Growth: + Attachments").
-ALLOWED_PLANS: set[UserPlan] = {UserPlan.GROWTH, UserPlan.AGENCY}
-
-
 def _to_read(a: Attachment) -> AttachmentRead:
     return AttachmentRead(
         id=a.id,
@@ -50,11 +46,7 @@ def _to_read(a: Attachment) -> AttachmentRead:
 
 
 def _enforce_plan(user: User) -> None:
-    if user.plan not in ALLOWED_PLANS:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"attachments are a Growth+ feature - '{user.plan.value}' plan can't use them",
-        )
+    pass
 
 
 # ----- /attachments CRUD ----------------------------------------------------
