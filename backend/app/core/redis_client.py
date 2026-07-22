@@ -16,8 +16,10 @@ def _clean_redis_url(url: str) -> str:
     return urlunparse(parsed._replace(query=clean_query))
 
 
+_is_ssl = urlparse(settings.REDIS_URL).scheme == "rediss"
+
 redis_client: Redis = Redis.from_url(
     _clean_redis_url(settings.REDIS_URL),
     decode_responses=True,
-    ssl_cert_reqs=None,
+    **({"ssl_cert_reqs": None} if _is_ssl else {}),
 )
