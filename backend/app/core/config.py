@@ -31,6 +31,12 @@ class Settings(BaseSettings):
 
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
 
+    # Optional: fires the GitHub Actions Celery worker immediately on
+    # campaign launch instead of waiting for the ~5min cron tick. See
+    # app/services/github_trigger.py. No-op if either is unset.
+    GITHUB_ACTIONS_TOKEN: str | None = None
+    GITHUB_ACTIONS_REPO: str | None = None
+
     @property
     def is_production(self) -> bool:
         return self.ENV.strip().lower() not in _NON_PROD_ENVS

@@ -202,9 +202,11 @@ def launch_campaign(
     if smtp is None or smtp.status != SmtpStatus.ACTIVE:
         raise HTTPException(status_code=400, detail="SMTP account is no longer active - re-verify it")
 
+    from app.services.github_trigger import trigger_worker_now
     from app.workers.tasks import start_campaign
 
     start_campaign.delay(str(c.id))
+    trigger_worker_now()
     if c.status == CampaignStatus.DRAFT:
         campaigns_repo.transition_to_queued_if_draft(db, c.id)
         db.refresh(c)
