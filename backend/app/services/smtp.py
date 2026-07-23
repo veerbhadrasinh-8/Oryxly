@@ -1,7 +1,26 @@
 import smtplib
+import socket
 import ssl
+from contextlib import contextmanager
 from dataclasses import dataclass
 from email.message import EmailMessage
+
+
+@contextmanager
+def _force_ipv4():
+    """Some hosts (e.g. Railway) lack outbound IPv6 routing; getaddrinfo
+    still returns AAAA records first, causing 'Network is unreachable'.
+    Scope getaddrinfo to IPv4-only for the duration of the SMTP connect."""
+    original = socket.getaddrinfo
+
+    def ipv4_only(host, port, family=0, type=0, proto=0, flags=0):
+        return original(host, port, socket.AF_INET, type, proto, flags)
+
+    socket.getaddrinfo = ipv4_only
+    try:
+        yield
+    finally:
+        socket.getaddrinfo = original
 
 
 @dataclass
@@ -26,13 +45,14 @@ class SmtpRecipientError(SmtpError):
 def _connect(creds: SmtpCreds, timeout: float = 12.0) -> smtplib.SMTP:
     """Open a TLS SMTP connection. Caller must close it."""
     ctx = ssl.create_default_context()
-    if creds.port == 465:
-        client = smtplib.SMTP_SSL(creds.host, creds.port, timeout=timeout, context=ctx)
-    else:
-        client = smtplib.SMTP(creds.host, creds.port, timeout=timeout)
-        client.ehlo()
-        client.starttls(context=ctx)
-        client.ehlo()
+    with _force_ipv4():
+        if creds.port == 465:
+            client = smtplib.SMTP_SSL(creds.host, creds.port, timeout=timeout, context=ctx)
+        else:
+            client = smtplib.SMTP(creds.host, creds.port, timeout=timeout)
+            client.ehlo()
+            client.starttls(context=ctx)
+            client.ehlo()
     return client
 
 
