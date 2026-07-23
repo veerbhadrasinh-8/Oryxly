@@ -1,0 +1,21 @@
+name: SMTP Port Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-smtp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test SMTP port 587 connectivity
+        run: |
+          python3 -c "
+          import socket
+          try:
+              s = socket.create_connection(('smtp.gmail.com', 587), timeout=8)
+              print('SUCCESS: connected to smtp.gmail.com:587')
+              s.close()
+          except Exception as e:
+              print(f'FAILED: {e}')
+              exit(1)
+          "
