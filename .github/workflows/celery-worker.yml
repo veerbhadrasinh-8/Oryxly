@@ -1,0 +1,44 @@
+name: Celery Worker (scheduled)
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: celery-worker
+  cancel-in-progress: false
+
+jobs:
+  drain-queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      ENV: production
+      DEBUG: "false"
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      REDIS_URL: ${{ secrets.REDIS_URL }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      FERNET_KEY: ${{ secrets.FERNET_KEY }}
+      CORS_ORIGINS: '["https://oryxly.in","https://www.oryxly.in"]'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run worker for a bounded window
+        run: |
+          timeout 240 uv run celery -A app.workers.celery_app worker \
+            --loglevel=info --concurrency=2 || true
