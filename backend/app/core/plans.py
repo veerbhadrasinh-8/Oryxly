@@ -28,9 +28,9 @@ MONTHLY_EMAIL_LIMIT: dict[UserPlan, int] = {
 }
 
 CAMPAIGNS_PER_MONTH_LIMIT: dict[UserPlan, int | None] = {
-    UserPlan.LITE: 5,
-    UserPlan.STARTER: 5,
-    UserPlan.GROWTH: None,  # unlimited
+    UserPlan.LITE: None,
+    UserPlan.STARTER: None,
+    UserPlan.GROWTH: None,
     UserPlan.AGENCY: None,
 }
 
